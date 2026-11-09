@@ -1,0 +1,16 @@
+{
+  "name": "Гуляю-собираю",
+  "short_name": "Гуляю",
+  "description": "Карточки за прогулки: выйди за круг, найди точку, собери коллекцию.",
+  "start_url": "./?src=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#12101a",
+  "theme_color": "#12101a",
+  "lang": "ru",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

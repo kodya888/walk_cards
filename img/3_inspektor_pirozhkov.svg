@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <!-- Инспектор пирожков: худой мужчина в фартуке с лупой и пирожком -->
+  <rect width="800" height="1000" fill="#f6ecd7"/>
+  <rect x="0" y="0" width="800" height="1000" fill="none" stroke="#e8d9b8" stroke-width="24"/>
+
+  <!-- тень -->
+  <ellipse cx="400" cy="912" rx="240" ry="24" fill="#e3d2ab"/>
+
+  <!-- ноги (худые) -->
+  <g stroke="#3a2a18" stroke-width="7" stroke-linecap="round">
+    <path d="M330 700 q-8 100 -12 175 l66 4 q2 -100 8 -175 z" fill="#7d8072"/>
+    <path d="M440 700 q10 100 14 175 l-66 4 q-4 -100 -10 -175 z" fill="#6f7264"/>
+    <path d="M292 872 q-26 26 -10 46 q56 14 112 2 q12 -30 -14 -48 z" fill="#5a3a22"/>
+    <path d="M484 872 q26 26 10 46 q-56 14 -112 2 q-12 -30 14 -48 z" fill="#4e321d"/>
+  </g>
+
+  <!-- туловище (рубаха) -->
+  <path d="M300 470 q100 -50 200 0 q20 120 8 240 q-110 35 -216 0 q-12 -120 8 -240 z"
+        fill="#e9d9a8" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <!-- фартук пекаря -->
+  <path d="M355 470 q45 -18 90 0 l14 60 q-60 22 -118 0 z" fill="#f7f2e2" stroke="#3a2a18" stroke-width="7"/>
+  <path d="M330 528 q70 26 140 0 l16 190 q-88 32 -172 0 z" fill="#f7f2e2" stroke="#3a2a18" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M352 570 h96 M356 610 h100 M354 650 h98" stroke="#c9c0a4" stroke-width="5"/>
+  <path d="M362 470 q-24 -40 -8 -58 M440 470 q24 -40 8 -58" fill="none" stroke="#3a2a18" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- левая рука держит пирожок -->
+  <path d="M310 490 q-58 55 -40 130 q28 38 84 30" fill="#e9d9a8" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <!-- правая рука с лупой -->
+  <path d="M492 490 q58 55 40 130 q-20 32 -66 30" fill="#e0cf9c" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="470" cy="652" r="24" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+  <circle cx="338" cy="648" r="24" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+
+  <!-- пирожок надкусанный -->
+  <g stroke="#3a2a18" stroke-width="7" stroke-linejoin="round">
+    <path d="M280 640 q-40 -55 30 -70 q90 -20 130 15 q25 30 -10 55 q-80 25 -150 0 z" fill="#d99a2b"/>
+    <path d="M295 588 q50 -18 100 2" fill="none" stroke="#b57c1e" stroke-width="5"/>
+    <!-- надкус -->
+    <path d="M278 618 q-18 22 2 40 q22 12 40 -2 q-30 -14 -42 -38 z" fill="#f6ecd7"/>
+    <!-- начинкапик -->
+    <circle cx="272" cy="636" r="7" fill="#8a5a28"/>
+    <circle cx="284" cy="648" r="6" fill="#a86a30"/>
+  </g>
+
+  <!-- лупа -->
+  <g stroke="#3a2a18" stroke-linecap="round">
+    <line x1="492" y1="640" x2="556" y2="580" stroke-width="16"/>
+    <circle cx="590" cy="548" r="72" fill="#dceaf2" fill-opacity="0.55" stroke-width="10"/>
+    <circle cx="590" cy="548" r="72" fill="none" stroke-width="10"/>
+    <circle cx="590" cy="548" r="58" fill="none" stroke="#ffffff" stroke-width="5" opacity="0.6"/>
+    <path d="M552 512 q-18 20 -14 48" fill="none" stroke="#ffffff" stroke-width="8" opacity="0.7"/>
+  </g>
+  <!-- пирожок под лупой (увеличенный) -->
+  <g stroke="#3a2a18" stroke-width="6" stroke-linejoin="round" opacity="0.85">
+    <path d="M548 560 q-30 -40 22 -52 q66 -14 96 10 q18 22 -8 40 q-58 20 -110 2 z" fill="#e8b04a"/>
+    <circle cx="575" cy="540" r="9" fill="#8a5a28"/>
+    <circle cx="600" cy="548" r="8" fill="#a86a30"/>
+    <circle cx="622" cy="538" r="7" fill="#8a5a28"/>
+  </g>
+
+  <!-- голова (худая, вытянутая) -->
+  <ellipse cx="395" cy="320" rx="128" ry="155" fill="#f2c99a" stroke="#3a2a18" stroke-width="8"/>
+  <circle cx="270" cy="335" r="24" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+  <circle cx="520" cy="335" r="24" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+  <!-- впалые щёки -->
+  <path d="M300 420 q20 22 44 12" fill="none" stroke="#c99868" stroke-width="6" stroke-linecap="round"/>
+  <path d="M490 420 q-20 22 -44 12" fill="none" stroke="#c99868" stroke-width="6" stroke-linecap="round"/>
+  <!-- нос длинный -->
+  <path d="M378 350 q-20 55 6 70 q28 10 36 -14 q8 -30 -4 -62 z" fill="#d96a4a" stroke="#3a2a18" stroke-width="7" stroke-linejoin="round"/>
+  <!-- глаза - прищур за лупой -->
+  <circle cx="340" cy="315" r="17" fill="#ffffff" stroke="#3a2a18" stroke-width="6"/>
+  <circle cx="452" cy="315" r="17" fill="#ffffff" stroke="#3a2a18" stroke-width="6"/>
+  <circle cx="344" cy="318" r="6" fill="#3a2a18"/>
+  <circle cx="448" cy="318" r="6" fill="#3a2a18"/>
+  <path d="M322 292 q20 -10 38 -2 M434 290 q20 -8 36 4" fill="none" stroke="#3a2a18" stroke-width="8" stroke-linecap="round"/>
+  <!-- сосредоточенный рот -->
+  <path d="M362 452 q30 12 60 -4" fill="none" stroke="#3a2a18" stroke-width="8" stroke-linecap="round"/>
+  <!-- волосы -->
+  <path d="M276 300 q-6 50 2 88 q12 -40 10 -88 z" fill="#d8d2c2" stroke="#3a2a18" stroke-width="5"/>
+  <path d="M514 300 q6 50 -2 88 q-12 -40 -10 -88 z" fill="#d8d2c2" stroke="#3a2a18" stroke-width="5"/>
+
+  <!-- пекарская шапочка -->
+  <path d="M272 240 q26 -115 124 -115 q100 0 122 115 q-124 38 -246 0 z"
+        fill="#fdf7e8" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M268 240 q128 40 254 0 l4 26 q-130 42 -262 0 z" fill="#efe6cc" stroke="#3a2a18" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M330 148 q10 42 6 84 M392 132 q8 46 4 98 M452 152 q4 40 8 82" fill="none" stroke="#d8cba8" stroke-width="5"/>
+</svg>

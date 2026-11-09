@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <!-- Летописец двора: мужчина с блокнотом на лавочке -->
+  <rect width="800" height="1000" fill="#f6ecd7"/>
+  <rect x="0" y="0" width="800" height="1000" fill="none" stroke="#e8d9b8" stroke-width="24"/>
+
+  <!-- тень -->
+  <ellipse cx="400" cy="905" rx="270" ry="26" fill="#e3d2ab"/>
+
+  <!-- лавочка -->
+  <g stroke="#3a2a18" stroke-width="7" stroke-linecap="round">
+    <rect x="150" y="700" width="500" height="34" rx="10" fill="#b5793a"/>
+    <rect x="170" y="600" width="460" height="30" rx="10" fill="#c98a44"/>
+    <rect x="195" y="630" width="26" height="75" fill="#8a5a28"/>
+    <rect x="580" y="630" width="26" height="75" fill="#8a5a28"/>
+    <rect x="185" y="730" width="24" height="170" fill="#8a5a28"/>
+    <rect x="590" y="730" width="24" height="170" fill="#8a5a28"/>
+    <rect x="185" y="820" width="430" height="20" fill="#8a5a28"/>
+  </g>
+
+  <!-- ноги -->
+  <g stroke="#3a2a18" stroke-width="7" stroke-linecap="round">
+    <path d="M310 660 q-15 90 -30 150" fill="#7d8072" stroke-width="0"/>
+    <path d="M300 655 q-20 95 -35 155 l70 8 q10 -90 25 -150 z" fill="#7d8072"/>
+    <path d="M470 655 q25 95 40 155 l-70 8 q-12 -90 -28 -150 z" fill="#6f7264"/>
+  </g>
+  <!-- ботинки -->
+  <g stroke="#3a2a18" stroke-width="7" stroke-linecap="round">
+    <path d="M240 810 q-30 30 -15 52 q55 14 110 2 q14 -34 -12 -52 z" fill="#5a3a22"/>
+    <path d="M515 810 q30 30 15 52 q-55 14 -110 2 q-14 -34 12 -52 z" fill="#4e321d"/>
+  </g>
+
+  <!-- туловище (кардинган) -->
+  <path d="M290 470 q110 -55 220 0 q28 100 12 200 q-122 40 -244 0 q-16 -100 12 -200 z"
+        fill="#8f8f5c" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <!-- рубашка -->
+  <path d="M370 455 q30 22 60 0 l8 60 q-38 20 -76 0 z" fill="#e9d9a8" stroke="#3a2a18" stroke-width="6"/>
+  <circle cx="400" cy="530" r="5" fill="#3a2a18"/>
+
+  <!-- левая рука с блокнотом -->
+  <path d="M300 500 q-55 60 -30 140 q30 40 90 30 l30 -40 q-70 0 -70 -60 q0 -45 20 -70 z"
+        fill="#8f8f5c" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <!-- правая рука -->
+  <path d="M500 500 q55 60 30 140 q-30 40 -90 30 l-30 -40 q70 0 70 -60 q0 -45 -20 -70 z"
+        fill="#8a8a55" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+
+  <!-- блокнот -->
+  <g stroke="#3a2a18" stroke-width="6" stroke-linejoin="round">
+    <path d="M300 620 l130 -20 l14 90 l-130 20 z" fill="#fdf7e8"/>
+    <path d="M300 620 l130 -20" fill="none" stroke-width="8"/>
+    <path d="M318 655 l95 -15 M322 675 l95 -15 M326 695 l95 -15" fill="none" stroke-width="4" stroke="#9aa2b0"/>
+  </g>
+  <!-- карандаш -->
+  <g stroke="#3a2a18" stroke-width="5" stroke-linejoin="round">
+    <path d="M420 560 l52 -34 l16 24 l-52 34 z" fill="#d99a2b"/>
+    <path d="M472 526 l18 -12 l10 14 l-18 12 z" fill="#f2c99a"/>
+    <path d="M490 514 l14 -10 l6 9 l-14 10 z" fill="#3a2a18"/>
+  </g>
+  <!-- кисти -->
+  <circle cx="310" cy="640" r="24" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+  <circle cx="452" cy="585" r="24" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+
+  <!-- голова -->
+  <ellipse cx="400" cy="330" rx="150" ry="160" fill="#f2c99a" stroke="#3a2a18" stroke-width="8"/>
+  <!-- уши -->
+  <circle cx="252" cy="345" r="26" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+  <circle cx="548" cy="345" r="26" fill="#f2c99a" stroke="#3a2a18" stroke-width="7"/>
+  <!-- щёчины -->
+  <circle cx="300" cy="400" r="30" fill="#eec08a" stroke="none" opacity="0.6"/>
+  <circle cx="500" cy="400" r="30" fill="#eec08a" stroke="none" opacity="0.6"/>
+  <!-- нос -->
+  <ellipse cx="400" cy="390" rx="34" ry="28" fill="#d96a4a" stroke="#3a2a18" stroke-width="7"/>
+  <!-- глаза -->
+  <circle cx="345" cy="330" r="16" fill="#ffffff" stroke="#3a2a18" stroke-width="6"/>
+  <circle cx="455" cy="330" r="16" fill="#ffffff" stroke="#3a2a18" stroke-width="6"/>
+  <circle cx="349" cy="334" r="6" fill="#3a2a18"/>
+  <circle cx="451" cy="334" r="6" fill="#3a2a18"/>
+  <!-- брови -->
+  <path d="M320 295 q25 -14 50 -4" fill="none" stroke="#3a2a18" stroke-width="8" stroke-linecap="round"/>
+  <path d="M430 291 q25 -10 50 4" fill="none" stroke="#3a2a18" stroke-width="8" stroke-linecap="round"/>
+  <!-- хитрая улыбка -->
+  <path d="M360 455 q40 28 80 0" fill="none" stroke="#3a2a18" stroke-width="8" stroke-linecap="round"/>
+  <!-- седые виски -->
+  <path d="M262 300 q-8 60 6 100 q14 -50 10 -100 z" fill="#e8e2d2" stroke="#3a2a18" stroke-width="5"/>
+  <path d="M538 300 q8 60 -6 100 q-14 -50 -10 -100 z" fill="#e8e2d2" stroke="#3a2a18" stroke-width="5"/>
+
+  <!-- смешная кепка -->
+  <path d="M258 250 q40 -130 150 -130 q115 0 145 130 q-150 45 -295 0 z"
+        fill="#c9862f" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M255 250 q145 48 300 0 q30 8 40 30 q-190 55 -380 0 q12 -24 40 -30 z"
+        fill="#b57426" stroke="#3a2a18" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="405" cy="122" r="14" fill="#b57426" stroke="#3a2a18" stroke-width="6"/>
+  <!-- клетка на кепке -->
+  <path d="M330 160 q10 45 5 88 M380 138 q8 50 4 104 M440 145 q5 48 8 96 M490 190 q2 35 6 58"
+        fill="none" stroke="#a3611c" stroke-width="4" opacity="0.7"/>
+</svg>

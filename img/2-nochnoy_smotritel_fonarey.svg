@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <!-- Ночной смотритель фонарей: подмигивает фонарю, уютная ночь -->
+  <rect width="800" height="1000" fill="#2f3a4e"/>
+  <rect x="0" y="0" width="800" height="1000" fill="none" stroke="#263042" stroke-width="24"/>
+
+  <!-- луна -->
+  <circle cx="655" cy="130" r="55" fill="#f2dfa8"/>
+  <circle cx="635" cy="115" r="10" fill="#e5cd8e"/>
+  <circle cx="672" cy="145" r="7" fill="#e5cd8e"/>
+  <!-- звёзды -->
+  <g fill="#f2dfa8">
+    <circle cx="110" cy="90" r="4"/><circle cx="200" cy="160" r="3"/><circle cx="320" cy="70" r="4"/>
+    <circle cx="460" cy="120" r="3"/><circle cx="560" cy="60" r="4"/><circle cx="90" cy="230" r="3"/>
+    <circle cx="730" cy="260" r="3"/><circle cx="250" cy="270" r="3"/>
+  </g>
+
+  <!-- тёплое свечение фонаря -->
+  <circle cx="585" cy="430" r="230" fill="#f2c86a" opacity="0.16"/>
+  <circle cx="585" cy="430" r="150" fill="#f2c86a" opacity="0.18"/>
+  <circle cx="585" cy="430" r="90" fill="#f7d98c" opacity="0.25"/>
+
+  <!-- тротуар -->
+  <rect x="0" y="860" width="800" height="140" fill="#3d4a60"/>
+  <g stroke="#333f52" stroke-width="6">
+    <path d="M0 900 h800 M0 950 h800 M130 860 v40 M400 860 v40 M640 860 v40 M260 900 v50 M540 900 v50 M120 950 v50 M430 950 v50 M680 950 v50"/>
+  </g>
+  <ellipse cx="380" cy="905" rx="240" ry="24" fill="#2c3648"/>
+
+  <!-- фонарь (подмигивает) -->
+  <g stroke="#1d2432" stroke-width="8" stroke-linecap="round">
+    <rect x="565" y="470" width="40" height="400" fill="#37455c"/>
+    <path d="M525 880 h120" stroke-width="12"/>
+    <rect x="545" y="440" width="80" height="36" rx="8" fill="#37455c"/>
+  </g>
+  <path d="M505 360 q80 -55 160 0 l-20 80 h-120 z" fill="#f7d98c" stroke="#1d2432" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="545" cy="395" r="12" fill="#1d2432"/>
+  <path d="M600 393 q22 -6 26 14" fill="none" stroke="#1d2432" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="585" cy="360" r="16" fill="#37455c" stroke="#1d2432" stroke-width="6"/>
+  <path d="M585 300 v45 M565 310 l40 -18" stroke="#f2dfa8" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- шарф -->
+  <path d="M255 560 q105 55 210 0 l18 62 q-122 58 -246 0 z" fill="#c05a3a" stroke="#161d29" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M300 610 q-12 90 8 150 q40 16 78 0 q16 -70 6 -140 z" fill="#a84c30" stroke="#161d29" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M318 660 h62 M316 700 h64 M318 738 h60" stroke="#8c3f28" stroke-width="6"/>
+
+  <!-- длинное пальто -->
+  <path d="M230 560 q135 -70 265 0 q30 160 14 310 q-148 45 -293 0 q-16 -150 14 -310 z"
+        fill="#6b5842" stroke="#161d29" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M362 540 l0 320" stroke="#161d29" stroke-width="6"/>
+  <circle cx="340" cy="640" r="7" fill="#161d29"/>
+  <circle cx="340" cy="720" r="7" fill="#161d29"/>
+  <!-- левая рука - поднята, подмигивает -->
+  <path d="M250 585 q-70 30 -60 105 q25 45 85 35" fill="#6b5842" stroke="#161d29" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="272" cy="722" r="24" fill="#f2c99a" stroke="#161d29" stroke-width="7"/>
+  <!-- правая рука в кармане -->
+  <path d="M478 585 q62 40 52 115 l-52 20" fill="#63513d" stroke="#161d29" stroke-width="8" stroke-linejoin="round"/>
+
+  <!-- ноги и ботинки -->
+  <g stroke="#161d29" stroke-width="7" stroke-linecap="round">
+    <path d="M300 865 l-8 40 h70 l4 -40 z" fill="#3a4152"/>
+    <path d="M408 865 l6 40 h70 l-10 -40 z" fill="#3a4152"/>
+    <path d="M262 905 q-24 26 -8 44 q52 12 104 2 q12 -30 -14 -46 z" fill="#4e3a26"/>
+    <path d="M462 905 q26 26 10 44 q-52 12 -104 2 q-12 -30 14 -46 z" fill="#42311f"/>
+  </g>
+
+  <!-- голова -->
+  <ellipse cx="360" cy="390" rx="145" ry="155" fill="#f2c99a" stroke="#161d29" stroke-width="8"/>
+  <circle cx="218" cy="405" r="25" fill="#f2c99a" stroke="#161d29" stroke-width="7"/>
+  <circle cx="502" cy="405" r="25" fill="#f2c99a" stroke="#161d29" stroke-width="7"/>
+  <!-- нос -->
+  <ellipse cx="360" cy="448" rx="34" ry="28" fill="#d96a4a" stroke="#161d29" stroke-width="7"/>
+  <!-- подмигивающий глаз (правый закрыт) -->
+  <circle cx="308" cy="390" r="17" fill="#ffffff" stroke="#161d29" stroke-width="6"/>
+  <circle cx="312" cy="394" r="6" fill="#161d29"/>
+  <path d="M392 392 q26 -12 48 0" fill="none" stroke="#161d29" stroke-width="9" stroke-linecap="round"/>
+  <!-- брови: одна высоко -->
+  <path d="M284 352 q26 -14 50 -4" fill="none" stroke="#161d29" stroke-width="8" stroke-linecap="round"/>
+  <path d="M398 350 q24 -18 46 -8" fill="none" stroke="#161d29" stroke-width="8" stroke-linecap="round"/>
+  <!-- улыбка -->
+  <path d="M320 512 q42 30 84 2" fill="none" stroke="#161d29" stroke-width="8" stroke-linecap="round"/>
+  <!-- румянец -->
+  <circle cx="262" cy="462" r="28" fill="#e8a06a" opacity="0.55"/>
+  <circle cx="462" cy="462" r="28" fill="#e8a06a" opacity="0.55"/>
+  <!-- волосы -->
+  <path d="M228 350 q-6 55 4 95 q12 -45 10 -95 z" fill="#d8d2c2" stroke="#161d29" stroke-width="5"/>
+  <path d="M492 350 q6 55 -4 95 q-12 -45 -10 -95 z" fill="#d8d2c2" stroke="#161d29" stroke-width="5"/>
+
+  <!-- шапка-ушанка -->
+  <path d="M222 320 q30 -135 140 -135 q112 0 138 135 q-140 42 -278 0 z"
+        fill="#7a6248" stroke="#161d29" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M215 315 q-30 25 -20 55 q40 18 70 -5 M508 315 q30 25 20 55 q-40 18 -70 -5"
+        fill="#8d7355" stroke="#161d29" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M240 330 q120 38 245 0" fill="none" stroke="#5f4c37" stroke-width="6"/>
+</svg>

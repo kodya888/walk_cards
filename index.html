@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<title>Гуляю-собираю</title>
+<meta name="theme-color" content="#12101a">
+<meta name="description" content="Карточки за прогулки: выйди за круг, найди точку, собери коллекцию.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- верхняя панель -->
+<header id="topbar">
+  <div class="stat"><span id="stat-cards">0</span><small>карточек</small></div>
+  <div class="stat"><span id="stat-walks">0</span><small>прогулок</small></div>
+  <button id="btn-collection" class="icon-btn" title="Коллекция">▦</button>
+</header>
+
+<!-- индикатор статуса прогулки -->
+<div id="hud" class="hidden">
+  <div id="hud-text">Ищем тебя на карте…</div>
+  <div id="hud-distance"></div>
+  <div class="hud-row">
+    <button id="btn-navigate" class="hud-btn hidden">Как дойти ↗</button>
+    <button id="btn-cancel" class="hud-btn danger">Закончить</button>
+  </div>
+</div>
+
+<!-- нижняя панель: старт -->
+<div id="start-sheet" class="sheet hidden">
+  <h2>Куда пойдём?</h2>
+  <p class="muted" id="mode-hint">Выбери режим поиска</p>
+
+  <div class="modes" id="modes">
+    <button class="mode-card" data-mode="circle">
+      <b>Выйти за круг</b>
+      <small>Просто уйди на 300 м от дома</small>
+    </button>
+    <button class="mode-card" data-mode="point">
+      <b>Найти точку</b>
+      <small>Поставь цель и дойди до неё</small>
+    </button>
+    <button class="mode-card locked" data-mode="route">
+      <b>Маршрут</b>
+      <small>2 точки подряд</small>
+      <span class="lock">🔒</span>
+    </button>
+  </div>
+
+  <div id="point-tools" class="hidden">
+    <p class="muted">Отодвинь точку пальцем: дальше — реже, но ценнее.</p>
+    <button id="btn-reroll" class="ghost-btn">Другое место</button>
+  </div>
+
+  <button id="btn-start" class="primary-btn">Начать поиск</button>
+  <button id="btn-close-sheet" class="ghost-btn">Отмена</button>
+</div>
+
+<!-- кнопка запуска -->
+<button id="btn-open-sheet" class="fab">Начать поиск</button>
+
+<!-- оверлей карточки -->
+<div id="card-overlay" class="overlay hidden">
+  <div class="card-shell" id="card-shell">
+    <div class="card-inner" id="card-inner">
+      <div class="face card-front" id="card-front">
+        <span class="card-no" id="card-no"></span>
+        <div class="card-scene"><img id="card-img" alt=""></div>
+        <div class="card-text" id="card-name"></div>
+        <span class="card-rarity" id="card-rarity"></span>
+      </div>
+      <div class="face card-back">
+        <div class="card-back-inner">
+          <div class="card-back-desc" id="card-desc"></div>
+          <div class="card-back-hint">нажми ещё раз</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="tap-hint">Нажми на карточку — она перевернётся</p>
+  <button id="btn-card-ok" class="primary-btn">Забрать</button>
+</div>
+
+<!-- коллекция -->
+<div id="collection" class="overlay hidden">
+  <div class="collection-head">
+    <h2>Коллекция</h2>
+    <button id="btn-collection-close" class="icon-btn">✕</button>
+  </div>
+  <p class="muted" id="collection-progress"></p>
+  <div class="grid" id="collection-grid"></div>
+</div>
+
+<!-- отладка -->
+<div id="debug" class="hidden">
+  <button id="btn-sim-350">пройти 350 м</button>
+  <button id="btn-sim-to-target">к цели</button>
+</div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="cards.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
