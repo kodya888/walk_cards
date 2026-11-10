@@ -2,7 +2,7 @@
    ВАЖНО: при любом изменении index.html / style.css / app.js / cards.js
    поднимай номер версии ниже (v1 -> v2), иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v3';
+const VERSION = 'wc-v4';
 
 const ASSETS = [
   './',
@@ -21,6 +21,31 @@ const ASSETS = [
   'img/1_letopisets_dvora.svg',
   'img/2-nochnoy_smotritel_fonarey.svg',
   'img/3_inspektor_pirozhkov.svg',
+  'img/lisa/01_borovik.webp',
+  'img/lisa/02_shapka_lisichka.webp',
+  'img/lisa/03_lisa_ryaninushka.webp',
+  'img/lisa/04_progulshchitsa.webp',
+  'img/lisa/05_zheludekhranitelnitsa.webp',
+  'img/lisa/06_kruzhka_dlya_dvoih.webp',
+  'img/lisa/07_tykolub.webp',
+  'img/lisa/08_sbortsitca_nalivnyh.webp',
+  'img/lisa/09_hodoka_pod_goroshek.webp',
+  'img/lisa/10_sviter_domik.webp',
+  'img/lisa/11_tykvenny_vsadnik.webp',
+  'img/lisa/12_zont_v_goroshek.webp',
+  'img/lisa/13_buketodarka.webp',
+  'img/lisa/14_chitatel_pod_pledom.webp',
+  'img/lisa/15_fonarshchitsa_s_ryabinoi.webp',
+  'img/lisa/16_gerbarii.webp',
+  'img/lisa/17_gurman_degustator.webp',
+  'img/lisa/18_sapogi_poprygunyi.webp',
+  'img/lisa/19_kokon_so_vkusom.webp',
+  'img/lisa/20_luzheprohodets.webp',
+  'img/lisa/21_ryabinovyi_adres.webp',
+  'img/lisa/22_kudryavaya_tykva.webp',
+  'img/lisa/23_gribnaya_kurerka.webp',
+  'img/lisa/24_sviter_obnimashka.webp',
+  'img/lisa/25_masteritsa.webp',
   'icons/icon-192.png',
   'icons/icon-512.png'
 ];

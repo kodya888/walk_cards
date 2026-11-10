@@ -26,6 +26,7 @@ let state = {
   collection: {},                 // id карточки -> сколько раз попадалась
   walks: 0,
   active: null,                   // текущая прогулка
+  home: null,                     // {lat,lng} — старт последней прогулки
   unlocked: { circle: true, point: true, route: false }
 };
 
@@ -131,6 +132,7 @@ const els = {
 let map = null;
 let meMarker = null;
 let layerGroup = null;      // всё, что относится к текущей прогулке
+let homeLayer = null;       // «призрак» дома на карте (куда вернуться)
 let draft = null;           // черновик точки до старта
 let chosenMode = 'circle';
 
@@ -145,10 +147,13 @@ function initMap() {
     attributionControl: true
   }).setView(CFG.DEFAULT_CENTER, CFG.ZOOM);
 
+  // стандартные бесплатные плитки OSM; тёмную «ночную» раскраску даёт CSS-фильтр
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
+
+  homeLayer = L.layerGroup().addTo(map);
 
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   layerGroup = L.layerGroup().addTo(map);
@@ -202,16 +207,23 @@ function onGeoError(err) {
 /* ---------------- карточка ---------------- */
 
 let currentCard = null;
+let cardFromGallery = false;
 
-function showCard(card) {
+/** Показ большой карточки. fromGallery=true — открыт из коллекции (обычный просмотр) */
+function showCard(card, fromGallery = false) {
   currentCard = card;
+  cardFromGallery = fromGallery;
   els.cardFront.classList.toggle('rare', card.rarity === 'rare');
   els.cardImg.src = card.img;
   els.cardImg.alt = card.name;
   els.cardName.textContent = card.name;
-  els.cardRarity.textContent = card.rarity === 'rare' ? '★ редкая' : 'обычная';
+  const has = state.collection[card.id] || 0;
+  els.cardRarity.textContent =
+    (card.rarity === 'rare' ? '★ редкая' : 'обычная') +
+    (fromGallery && has > 1 ? ' · есть ×' + has : '');
   els.cardDesc.textContent = card.desc || '';
   els.cardNo.textContent = '№ ' + String(CARDS.indexOf(card) + 1).padStart(2, '0');
+  els.btnCardOk.textContent = fromGallery ? 'Вернуть в галерею' : 'Забрать';
   els.cardInner.classList.remove('flipped');
 
   els.cardOverlay.classList.remove('hidden');
@@ -222,7 +234,13 @@ function showCard(card) {
 
 function hideCard() {
   els.cardOverlay.classList.add('hidden');
+  const fromGallery = cardFromGallery;
   currentCard = null;
+  cardFromGallery = false;
+  if (fromGallery) {
+    // возвращаемся в галерею, на то же место
+    els.collection.classList.remove('hidden');
+  }
 }
 
 /* ---------------- коллекция ---------------- */
@@ -237,12 +255,17 @@ function renderCollection() {
     const el = document.createElement('div');
     if (ownedCount > 0) {
       el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
-      el.innerHTML = `<img src="${card.img}" alt=""><div>${card.name}</div>`;
+      el.innerHTML = `<img src="${card.img}" alt=""><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
       if (ownedCount > 1) {
-        const badge = document.createElement('small');
+        const badge = document.createElement('span');
+        badge.className = 'mini-count';
         badge.textContent = '×' + ownedCount;
         el.appendChild(badge);
       }
+      el.addEventListener('click', () => {
+        els.collection.classList.add('hidden');
+        showCard(card, true);
+      });
     } else {
       el.className = 'mini-card empty';
       el.textContent = '?';
@@ -289,7 +312,8 @@ function makeDraftPoint() {
   }).addTo(layerGroup);
 
   const circle = L.circle([me.lat, me.lng], {
-    radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2, fillColor: '#7c5cff', fillOpacity: 0.06
+    radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2, fillColor: '#7c5cff', fillOpacity: 0.06,
+    className: 'home-ring'
   }).addTo(layerGroup);
 
   const marker = L.marker([t.lat, t.lng], {
@@ -356,7 +380,7 @@ function startWalk() {
     const pts = [];
     let prev = { lat: me.lat, lng: me.lng };
     for (let i = 0; i < CFG.ROUTE_LEN; i++) {
-      const p = destination(prev, 300 + Math.random() * 200, Math.random() * 360);
+      const p = destination(prev, CFG.CIRCLE_R + Math.random() * 200, Math.random() * 360);
       pts.push(p);
       prev = p;
     }
@@ -364,8 +388,10 @@ function startWalk() {
   }
 
   state.active = active;
+  state.home = { lat: me.lat, lng: me.lng };
   save();
   clearDraft();
+  homeLayer.clearLayers();
   els.startSheet.classList.add('hidden');
   drawActive();
   tick(true);
@@ -386,7 +412,7 @@ function drawActive() {
   // стартовая точка
   L.circle([a.start.lat, a.start.lng], {
     radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2,
-    fillColor: '#7c5cff', fillOpacity: 0.05
+    fillColor: '#7c5cff', fillOpacity: 0.05, className: 'home-ring'
   }).addTo(layerGroup);
 
   if (a.mode === 'circle') {
@@ -508,7 +534,7 @@ function finishWalk() {
   let mode = a.mode;
 
   if (mode === 'circle') {
-    frac = Math.min(1, Math.max(0, (haversine(me, a.start) - CFG.CIRCLE_R) / 300));
+    frac = Math.min(1, Math.max(0, (haversine(me, a.start) - CFG.CIRCLE_R) / CFG.CIRCLE_R));
   } else if (mode === 'point') {
     const d = haversine(a.start, a.target);
     frac = Math.min(1, Math.max(0, (d - CFG.POINT_MIN) / (CFG.POINT_MAX - CFG.POINT_MIN)));
@@ -555,7 +581,20 @@ function openSheet() {
   // сброс выбора
   [...els.modes.children].forEach(b => b.classList.remove('selected'));
   els.pointTools.classList.add('hidden');
-  els.modeHint.textContent = 'Выбери режим поиска';
+
+  // подсказка про дом, если ты далеко от него
+  const away = state.home && me ? haversine(me, state.home) : 0;
+  els.modeHint.textContent = away > CFG.CIRCLE_R
+    ? `Ты в ${fmtDist(away)} от дома — выбери, каким путём вернёшься`
+    : 'Выбери режим поиска';
+
+  if (state.home) {
+    homeLayer.clearLayers();
+    L.circle([state.home.lat, state.home.lng], {
+      radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2, dashArray: '4 8',
+      fillColor: '#7c5cff', fillOpacity: 0.04, className: 'home-ghost'
+    }).addTo(homeLayer);
+  }
   clearDraft();
 }
 
@@ -637,6 +676,7 @@ function bindUi() {
 
   els.btnCollection.addEventListener('click', () => {
     renderCollection();
+    els.collection.scrollTop = 0;   // галерея всегда открывается с начала
     els.collection.classList.remove('hidden');
   });
   els.btnCollectionClose.addEventListener('click', () => els.collection.classList.add('hidden'));
