@@ -2,7 +2,7 @@
    ВАЖНО: при любом изменении index.html / style.css / app.js / cards.js
    поднимай номер версии ниже (v1 -> v2), иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v4';
+const VERSION = 'wc-v5';
 
 const ASSETS = [
   './',

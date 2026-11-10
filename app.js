@@ -14,6 +14,13 @@ const CFG = {
   TICK_MS: 4000,          // как часто обрабатывать позицию
   ROUTE_LEN: 2,           // точек в маршруте на текущем уровне
   ROUTE_UNLOCK_WALKS: 3,  // после скольких прогулок открывается маршрут
+  LIMIT_TIERS: [          // дневной лимит карточек по «прокачке» (всего прогулок)
+    { from: 0,  limit: 2 },
+    { from: 5,  limit: 3 },
+    { from: 15, limit: 4 },
+    { from: 30, limit: 5 }
+    // анлим — в будущем за купленный пак (снимать лимит через флаг в save)
+  ],
   ZOOM: 16,
   DEFAULT_CENTER: [56.3269, 44.0059] // Нижний Новгород
 };
@@ -24,7 +31,10 @@ const STORE_KEY = 'walk_cards_v1';
 
 let state = {
   collection: {},                 // id карточки -> сколько раз попадалась
+  order: [],                      // id карточек в порядке получения (для галереи)
   walks: 0,
+  walksToday: 0,                  // карточек за сегодня
+  day: '',                        // 'ГГГГ-ММ-ДД' — сброс дневного счётчика
   active: null,                   // текущая прогулка
   home: null,                     // {lat,lng} — старт последней прогулки
   unlocked: { circle: true, point: true, route: false }
@@ -43,6 +53,43 @@ function load() {
     }
   } catch (e) {}
   state.unlocked.route = state.walks >= CFG.ROUTE_UNLOCK_WALKS;
+  if (!Array.isArray(state.order)) {          // переход со старой версии
+    state.order = CARDS.filter(c => state.collection[c.id] > 0).map(c => c.id);
+  }
+  state.order = [...new Set(state.order)].filter(id => CARD_BY_ID[id]);
+  // собранные, но потерявшие позицию карточки — дописать в конец (страховка)
+  Object.keys(state.collection).forEach(id => {
+    if (state.collection[id] > 0 && CARD_BY_ID[id] && !state.order.includes(id)) {
+      state.order.push(id);
+    }
+  });
+}
+
+/* ---------------- дневной лимит карточек ---------------- */
+
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
+         String(d.getDate()).padStart(2, '0');
+}
+
+function rollDay() {
+  const key = todayKey();
+  if (state.day !== key) {
+    state.day = key;
+    state.walksToday = 0;
+  }
+}
+
+function dailyLimit() {
+  let limit = CFG.LIMIT_TIERS[0].limit;
+  CFG.LIMIT_TIERS.forEach(t => { if (state.walks >= t.from) limit = t.limit; });
+  return limit;
+}
+
+function cardsLeftToday() {
+  rollDay();
+  return Math.max(0, dailyLimit() - (state.walksToday || 0));
 }
 
 /* ---------------- геометрия ---------------- */
@@ -246,30 +293,36 @@ function hideCard() {
 /* ---------------- коллекция ---------------- */
 
 function renderCollection() {
-  const owned = Object.keys(state.collection).filter(id => CARD_BY_ID[id]);
-  els.collectionProgress.textContent = `Собрано ${owned.length} из ${CARDS.length}`;
+  // карточки лежат в порядке получения: первая выпавшая — слева сверху,
+  // каждая новая добавляется в конец. Пустые слоты не показываем.
+  const order = state.order.filter(id => CARD_BY_ID[id] && state.collection[id] > 0);
+  els.collectionProgress.textContent = `Собрано ${order.length} из ${CARDS.length}`;
   els.collectionGrid.innerHTML = '';
 
-  CARDS.forEach(card => {
-    const ownedCount = state.collection[card.id] || 0;
+  if (!order.length) {
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = 'Пока пусто. Выйди за круг — первая карточка твоя.';
+    els.collectionGrid.appendChild(p);
+    return;
+  }
+
+  order.forEach(id => {
+    const card = CARD_BY_ID[id];
+    const ownedCount = state.collection[id] || 0;
     const el = document.createElement('div');
-    if (ownedCount > 0) {
-      el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
-      el.innerHTML = `<img src="${card.img}" alt=""><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
-      if (ownedCount > 1) {
-        const badge = document.createElement('span');
-        badge.className = 'mini-count';
-        badge.textContent = '×' + ownedCount;
-        el.appendChild(badge);
-      }
-      el.addEventListener('click', () => {
-        els.collection.classList.add('hidden');
-        showCard(card, true);
-      });
-    } else {
-      el.className = 'mini-card empty';
-      el.textContent = '?';
+    el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
+    el.innerHTML = `<img src="${card.img}" alt=""><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
+    if (ownedCount > 1) {
+      const badge = document.createElement('span');
+      badge.className = 'mini-count';
+      badge.textContent = '×' + ownedCount;
+      el.appendChild(badge);
     }
+    el.addEventListener('click', () => {
+      els.collection.classList.add('hidden');
+      showCard(card, true);
+    });
     els.collectionGrid.appendChild(el);
   });
 }
@@ -369,6 +422,14 @@ function startWalk() {
     return;
   }
   if (chosenMode === 'route' && !state.unlocked.route) return;
+
+  rollDay();
+  if (cardsLeftToday() <= 0) {
+    els.modeHint.textContent =
+      'Дневной лимит карточек исчерпан — новая карточка завтра. ' +
+      'Гуляешь дальше ради удовольствия? Прогулка без награды: «Закончить» сейчас.';
+    return;
+  }
 
   let active;
   if (chosenMode === 'circle') {
@@ -542,8 +603,25 @@ function finishWalk() {
     frac = 1;
   }
 
+  rollDay();
+
+  // награда только если дневной лимит ещё не исчерпан
+  if (cardsLeftToday() <= 0) {
+    state.active = null;
+    save();
+    layerGroup.clearLayers();
+    els.hud.classList.add('hidden');
+    els.btnOpenSheet.classList.remove('hidden');
+    openSheet();
+    els.modeHint.textContent =
+      'Дневной лимит карточек исчерпан — новая карточка завтра. До завтра!';
+    return;
+  }
+
   const card = pickReward(mode, frac);
   state.collection[card.id] = (state.collection[card.id] || 0) + 1;
+  if (!(state.order || []).includes(card.id)) state.order.push(card.id);
+  state.walksToday = (state.walksToday || 0) + 1;
   state.walks += 1;
   state.unlocked.route = state.walks >= CFG.ROUTE_UNLOCK_WALKS;
   state.active = null;
@@ -582,11 +660,15 @@ function openSheet() {
   [...els.modes.children].forEach(b => b.classList.remove('selected'));
   els.pointTools.classList.add('hidden');
 
-  // подсказка про дом, если ты далеко от него
+  // подсказка про дом, если ты далеко от него + сколько карточек осталось на сегодня
   const away = state.home && me ? haversine(me, state.home) : 0;
-  els.modeHint.textContent = away > CFG.CIRCLE_R
-    ? `Ты в ${fmtDist(away)} от дома — выбери, каким путём вернёшься`
-    : 'Выбери режим поиска';
+  const left = cardsLeftToday();
+  const lim = dailyLimit();
+  const limText = `Сегодня: ${lim - left} из ${lim} карточек`;
+  els.modeHint.textContent =
+    (away > CFG.CIRCLE_R ? `Ты в ${fmtDist(away)} от дома — выбери, каким путём вернёшься.` : '') +
+    ` ${limText}.` +
+    (left > 0 ? '' : ' Лимит исчерпан — новая карточка завтра.');
 
   if (state.home) {
     homeLayer.clearLayers();
