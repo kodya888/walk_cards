@@ -249,7 +249,7 @@ html, body {
   -webkit-mask-size: auto 100%; mask-size: auto 100%;
 }
 
-/* Лиса.Осень: «Лиса-рябинушка» */
+/* Лисичка.Осень: «Лиса-рябинушка» */
 .card-back[data-pack="lisa"] {
   --back-field: #a8342a;
   --mark-ink: #a8342a;
@@ -260,7 +260,7 @@ html, body {
   -webkit-mask-size: 88%; mask-size: 88%;
 }
 
-/* Лиса.Зима: зимняя лисичка с подарком */
+/* Лис.Зима: зимний лис с подарком */
 .card-back[data-pack="zima"] {
   --back-field: #2b5580;
   --mark-ink: #2b5580;
@@ -303,6 +303,17 @@ html, body {
   max-width: 96%;
 }
 
+/* карточки без описания (осенний и зимний паки): освободившееся место
+   отдаём картинке — меньше отступов, крупнее сцена */
+.card-front.no-desc { padding: 12px 8px 8px; }
+.card-front.no-desc .card-scene { padding: 14px 2px 2px; }
+.card-front.no-desc .card-text { padding: 2px 8px 1px; }
+.card-front.no-desc .card-rarity { padding-bottom: 2px; }
+
+/* зимние картинки квадратные: чуть увеличиваем, чтобы лис занимал больше
+   места, а прозрачные поля по бокам не читались как пустота */
+.card-front[data-pack="zima"] .card-scene img { transform: scale(1.12); }
+
 .card-rarity {
   font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
   color: #8a7a55; padding-bottom: 4px;
@@ -317,10 +328,52 @@ html, body {
   overflow-y: auto;
 }
 .collection-head {
-  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  width: 100%; display: flex; align-items: center; gap: 10px;
   margin-bottom: 6px;
 }
-.collection-head h2 { margin: 0; font-size: 21px; font-family: Georgia, "Times New Roman", serif; }
+.collection-head h2 { margin: 0 auto 0 0; font-size: 21px; font-family: Georgia, "Times New Roman", serif; }
+
+/* список коллекций (паков) */
+.packs-list {
+  width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 16px;
+}
+.pack-tile {
+  width: 100%; display: flex; align-items: center; gap: 16px;
+  padding: 12px 14px; border-radius: 16px; cursor: pointer;
+  background: var(--panel-2); color: var(--ink);
+  border: 1px solid rgba(255,255,255,.08);
+  font: inherit; text-align: left;
+  transition: transform .12s, border-color .15s;
+}
+.pack-tile:active { transform: scale(.985); }
+.pack-tile-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pack-tile-info b { font-family: Georgia, "Times New Roman", serif; font-size: 17px; font-weight: 600; }
+.pack-tile-info small { color: var(--muted); font-size: 13px; }
+.pack-tile-arrow { margin-left: auto; color: var(--muted); font-size: 26px; line-height: 1; }
+
+/* маленькая рубашка пака в списке коллекций */
+.pack-tile-back {
+  position: relative; display: block; flex: none;
+  width: 56px; aspect-ratio: 2/3;
+  transform: none; border-width: 4px; border-radius: 9px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.35);
+}
+.pack-tile-back .card-back-inner { border-radius: 5px; }
+.pack-tile-back .card-back-inner::before { inset: 5px; border-width: 1px; border-radius: 3px; }
+.pack-tile-back .card-back-mark { width: 62%; min-width: 0; box-shadow: none; }
+
+/* поздравление: собраны все коллекции */
+.complete-box {
+  width: min(90vw, 420px); padding: 26px 22px 22px; text-align: center;
+  background: var(--panel); border: 1px solid rgba(255,224,138,.28);
+  border-radius: 22px; box-shadow: 0 24px 60px rgba(0,0,0,.6);
+}
+.complete-mark {
+  font-size: 46px; line-height: 1; color: var(--gold-hi);
+  text-shadow: 0 0 26px rgba(255,192,64,.65); margin-bottom: 10px;
+}
+.complete-box h2 { margin: 0 0 8px; font-family: Georgia, "Times New Roman", serif; font-size: 23px; }
+.complete-box p { margin: 0 0 16px; color: var(--muted); font-size: 15px; line-height: 1.45; }
 
 .grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));

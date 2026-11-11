@@ -167,9 +167,15 @@ const els = {
   cardRarity: $('card-rarity'),
   btnCardOk: $('btn-card-ok'),
   collection: $('collection'),
+  collectionTitle: $('collection-title'),
   collectionGrid: $('collection-grid'),
   collectionProgress: $('collection-progress'),
+  packsList: $('packs-list'),
+  packView: $('pack-view'),
+  btnCollectionBack: $('btn-collection-back'),
   btnCollectionClose: $('btn-collection-close'),
+  completeOverlay: $('complete-overlay'),
+  btnCompleteOk: $('btn-complete-ok'),
   debug: $('debug'),
   btnSim350: $('btn-sim-350'),
   btnSimTarget: $('btn-sim-to-target')
@@ -256,6 +262,7 @@ function onGeoError(err) {
 
 let currentCard = null;
 let cardFromGallery = false;
+let pendingComplete = false;   // собрана последняя карточка — показать поздравление после неё
 
 /* у каждого пака — своя рубашка: фон, узор и круглый знак задаёт CSS
    по data-pack. Надписей на рубашке нет. */
@@ -267,11 +274,13 @@ function showCard(card, fromGallery = false) {
   const pack = card.pack || 'gorod';
 
   els.cardBack.dataset.pack = pack;
+  els.cardFront.dataset.pack = pack;
 
   // подпись карточки всегда на лицевой стороне: на обороте только знак
   const desc = card.desc || '';
   els.cardFrontDesc.textContent = desc;
   els.cardFrontDesc.classList.toggle('hidden', !desc);
+  els.cardFront.classList.toggle('no-desc', !desc);
 
   els.cardFront.classList.toggle('rare', card.rarity === 'rare');
   els.cardImg.src = card.img;
@@ -299,44 +308,99 @@ function hideCard() {
   if (fromGallery) {
     // возвращаемся в галерею, на то же место
     els.collection.classList.remove('hidden');
+  } else if (pendingComplete) {
+    // это была последняя карточка — поздравляем
+    pendingComplete = false;
+    els.completeOverlay.classList.remove('hidden');
   }
 }
 
 /* ---------------- коллекция ---------------- */
 
+function packStats(key) {
+  const cards = CARDS.filter(c => (c.pack || 'gorod') === key);
+  const got = cards.filter(c => state.collection[c.id] > 0).length;
+  return { total: cards.length, got };
+}
+
+function makeMiniCard(card) {
+  const ownedCount = state.collection[card.id] || 0;
+  const el = document.createElement('div');
+  el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
+  el.innerHTML = `<img src="${card.img}" alt=""><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
+  if (ownedCount > 1) {
+    const badge = document.createElement('span');
+    badge.className = 'mini-count';
+    badge.textContent = '×' + ownedCount;
+    el.appendChild(badge);
+  }
+  el.addEventListener('click', () => {
+    els.collection.classList.add('hidden');
+    showCard(card, true);
+  });
+  return el;
+}
+
+/** Экран 1: список коллекций (паков). */
 function renderCollection() {
-  // карточки лежат в порядке получения: первая выпавшая — слева сверху,
-  // каждая новая добавляется в конец. Пустые слоты не показываем.
-  const order = state.order.filter(id => CARD_BY_ID[id] && state.collection[id] > 0);
-  els.collectionProgress.textContent = `Собрано ${order.length} из ${CARDS.length}`;
+  const got = CARDS.filter(c => state.collection[c.id] > 0).length;
+  els.collectionTitle.textContent = 'Коллекция';
+  els.collectionProgress.textContent = `Собрано ${got} из ${CARDS.length}`;
+  els.btnCollectionBack.classList.add('hidden');
+  els.packView.classList.add('hidden');
+  els.packsList.classList.remove('hidden');
+  els.packsList.innerHTML = '';
+
+  PACKS.forEach(p => {
+    const s = packStats(p.key);
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'pack-tile';
+    tile.dataset.pack = p.key;
+    tile.innerHTML =
+      '<span class="pack-tile-back card-back" data-pack="' + p.key + '">' +
+        '<span class="card-back-inner"><span class="card-back-mark"></span></span>' +
+      '</span>' +
+      '<span class="pack-tile-info"><b>' + p.title + '</b>' +
+        '<small>Собрано ' + s.got + ' из ' + s.total + '</small></span>' +
+      '<span class="pack-tile-arrow" aria-hidden="true">›</span>';
+    tile.addEventListener('click', () => openPack(p.key));
+    els.packsList.appendChild(tile);
+  });
+
+  els.collection.scrollTop = 0;
+}
+
+/** Экран 2: собранные карточки одной коллекции. */
+function openPack(key) {
+  const info = PACK_BY_KEY[key];
+  if (!info) return;
+
+  const s = packStats(key);
+  els.collectionTitle.textContent = info.title;
+  els.collectionProgress.textContent = `Собрано ${s.got} из ${s.total}`;
+  els.btnCollectionBack.classList.remove('hidden');
+  els.packsList.classList.add('hidden');
+  els.packView.classList.remove('hidden');
   els.collectionGrid.innerHTML = '';
+
+  // state.order хранит порядок получения. Показываем наоборот:
+  // последняя выпавшая карточка — первой в верхнем ряду.
+  const order = state.order
+    .filter(id => CARD_BY_ID[id] && state.collection[id] > 0 &&
+                  (CARD_BY_ID[id].pack || 'gorod') === key)
+    .reverse();
 
   if (!order.length) {
     const p = document.createElement('p');
     p.className = 'muted';
     p.textContent = 'Пока пусто. Выйди за круг — первая карточка твоя.';
     els.collectionGrid.appendChild(p);
-    return;
+  } else {
+    order.forEach(id => els.collectionGrid.appendChild(makeMiniCard(CARD_BY_ID[id])));
   }
 
-  order.forEach(id => {
-    const card = CARD_BY_ID[id];
-    const ownedCount = state.collection[id] || 0;
-    const el = document.createElement('div');
-    el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
-    el.innerHTML = `<img src="${card.img}" alt=""><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
-    if (ownedCount > 1) {
-      const badge = document.createElement('span');
-      badge.className = 'mini-count';
-      badge.textContent = '×' + ownedCount;
-      el.appendChild(badge);
-    }
-    el.addEventListener('click', () => {
-      els.collection.classList.add('hidden');
-      showCard(card, true);
-    });
-    els.collectionGrid.appendChild(el);
-  });
+  els.collection.scrollTop = 0;
 }
 
 function renderStats() {
@@ -630,9 +694,16 @@ function finishWalk() {
     return;
   }
 
+  const wasComplete = CARDS.every(c => (state.collection[c.id] || 0) > 0);
   const card = pickReward(mode, frac);
   state.collection[card.id] = (state.collection[card.id] || 0) + 1;
-  if (!(state.order || []).includes(card.id)) state.order.push(card.id);
+  // последняя выпавшая карточка — всегда первая в галерее:
+  // убираем её из старой позиции и дописываем в конец order
+  state.order = (state.order || []).filter(id => id !== card.id);
+  state.order.push(card.id);
+  if (!wasComplete && CARDS.every(c => (state.collection[c.id] || 0) > 0)) {
+    pendingComplete = true;
+  }
   state.walksToday = (state.walksToday || 0) + 1;
   state.walks += 1;
   state.unlocked.route = state.walks >= CFG.ROUTE_UNLOCK_WALKS;
@@ -769,11 +840,12 @@ function bindUi() {
   els.btnCardOk.addEventListener('click', hideCard);
 
   els.btnCollection.addEventListener('click', () => {
-    renderCollection();
-    els.collection.scrollTop = 0;   // галерея всегда открывается с начала
+    renderCollection();               // открываем со списка коллекций
     els.collection.classList.remove('hidden');
   });
+  els.btnCollectionBack.addEventListener('click', renderCollection);
   els.btnCollectionClose.addEventListener('click', () => els.collection.classList.add('hidden'));
+  els.btnCompleteOk.addEventListener('click', () => els.completeOverlay.classList.add('hidden'));
 
   els.btnSim350.addEventListener('click', () => {
     const a = state.active;

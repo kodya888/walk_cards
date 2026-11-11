@@ -1,15 +1,16 @@
 /* Service worker: офлайн-кэш приложения.
    ВАЖНО: при любом изменении index.html / style.css / app.js / cards.js
-   поднимай номер версии ниже (v1 -> v2), иначе телефон покажет старую копию. */
+   поднимай номер версии (ниже и в ?v=... у тегов в index.html),
+   иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v10';
+const VERSION = 'wc-v12';
 
 const ASSETS = [
   './',
   'index.html',
-  'style.css',
-  'app.js',
-  'cards.js',
+  'style.css?v=12',
+  'app.js?v=12',
+  'cards.js?v=12',
   'manifest.json',
   'vendor/leaflet/leaflet.css',
   'vendor/leaflet/leaflet.js',
@@ -48,6 +49,30 @@ const ASSETS = [
   'img/lisa/23_gribnaya_kurerka.webp',
   'img/lisa/24_sviter_obnimashka.webp',
   'img/lisa/25_masteritsa.webp',
+  'img/zima/01_elochny_naryadchik.webp',
+  'img/zima/02_termos_sogrevatel.webp',
+  'img/zima/03_elochny_verholaz.webp',
+  'img/zima/04_pled_kokon.webp',
+  'img/zima/05_pervy_led.webp',
+  'img/zima/06_podarkonosets.webp',
+  'img/zima/07_sharik_zateynik.webp',
+  'img/zima/08_podarok_fonarik.webp',
+  'img/zima/09_elkonosets.webp',
+  'img/zima/10_snegovikov_drug.webp',
+  'img/zima/11_figurist_lis.webp',
+  'img/zima/12_snegouborshchik.webp',
+  'img/zima/13_snezhny_kurier.webp',
+  'img/zima/14_chitatel_u_fonarya.webp',
+  'img/zima/15_snezhny_plyasun.webp',
+  'img/zima/16_pryanichny_stol.webp',
+  'img/zima/17_drovonos.webp',
+  'img/zima/18_hozyain_kresla.webp',
+  'img/zima/19_drug_batarei.webp',
+  'img/zima/20_lyzhnik_lis.webp',
+  'img/zima/21_lovets_snezhinok.webp',
+  'img/zima/22_snezhny_angel.webp',
+  'img/zima/23_nablyudatel_u_okna.webp',
+  'img/zima/24_passazhir_s_kakao.webp',
   'icons/icon-192.png',
   'icons/icon-512.png'
 ];

@@ -10,7 +10,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -88,14 +88,28 @@
   <button id="btn-card-ok" class="primary-btn">Забрать</button>
 </div>
 
-<!-- коллекция -->
+<!-- коллекция: сначала список паков, внутри пака — его карточки -->
 <div id="collection" class="overlay hidden">
   <div class="collection-head">
-    <h2>Коллекция</h2>
+    <button id="btn-collection-back" class="icon-btn hidden" title="Назад">←</button>
+    <h2 id="collection-title">Коллекция</h2>
     <button id="btn-collection-close" class="icon-btn">✕</button>
   </div>
   <p class="muted" id="collection-progress"></p>
-  <div class="grid" id="collection-grid"></div>
+  <div id="packs-list" class="packs-list"></div>
+  <div id="pack-view" class="hidden">
+    <div class="grid" id="collection-grid"></div>
+  </div>
+</div>
+
+<!-- все коллекции собраны -->
+<div id="complete-overlay" class="overlay hidden">
+  <div class="complete-box">
+    <div class="complete-mark">★</div>
+    <h2>Вы собрали все коллекции</h2>
+    <p>Поздравляем! Когда появится новая коллекция — мы вам сообщим.</p>
+    <button id="btn-complete-ok" class="primary-btn">Отлично</button>
+  </div>
 </div>
 
 <!-- отладка -->
@@ -105,7 +119,7 @@
 </div>
 
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="cards.js"></script>
-<script src="app.js"></script>
+<script src="cards.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
