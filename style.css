@@ -178,25 +178,97 @@ html, body {
   background: linear-gradient(165deg, #fffaf0, #f0e2c0);
 }
 
-/* рубашка карточки — в стиле иллюстратора: красный в белый горошек */
+/* ===== рубашка карточки =====
+   Белый кант, ровное поле цвета коллекции, двойная белая рамка
+   и круглый знак ровно по центру. Знак — вырезанный силуэт
+   одной из картинок пака, залитый цветом поля. */
 .card-back {
   transform: rotateY(180deg);
-  background:
-    radial-gradient(circle at 50% 30%, #d9503f, #9c2f24 70%, #7c2118 100%);
-  border: 2px solid var(--gold-hi);
+  background: var(--back-field, #a8342a);
+  border: 7px solid #fff;
+  border-radius: 16px;
   box-shadow: 0 18px 50px rgba(0,0,0,.55);
 }
+
 .card-back-inner {
-  width: calc(100% - 24px); height: calc(100% - 24px); margin: auto;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  border: 2px dashed rgba(255,255,255,.55); border-radius: 12px;
-  background-image: radial-gradient(circle, rgba(255,255,255,.28) 2.5px, transparent 3px);
-  background-size: 22px 22px;
-  padding: 14px;
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; border-radius: 9px;
+  background-color: var(--back-field, #a8342a);
+  background-image: var(--back-pattern, none);
+  background-size: var(--back-pattern-size, auto);
 }
+
+/* малая контурная обводка внутри поля */
+.card-back-inner::before {
+  content: ""; position: absolute; inset: 10px;
+  border: 1.5px solid rgba(255,255,255,.55);
+  border-radius: 6px; pointer-events: none;
+}
+
+/* белый круг без канта: внутри — силуэт пака цветом поля */
 .card-back-mark {
-  font-size: 64px; font-weight: 800; color: rgba(255,255,255,.9);
-  text-shadow: 0 4px 14px rgba(60,10,0,.45);
+  position: relative;
+  width: clamp(76px, 34%, 116px);
+  aspect-ratio: 1; flex: none;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.22);
+}
+.card-back-mark::before {
+  content: ""; position: absolute; inset: 10%;
+  background-color: var(--mark-ink, #23204a);
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain;   mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+
+/* подпись коллекции внутри контурной обводки (варианты Д и Е в отладке) */
+.card-back-label {
+  position: absolute; left: 0; right: 0;
+  text-align: center;
+  font-size: 10px; font-weight: 800; letter-spacing: .22em;
+  text-transform: uppercase; color: rgba(255,255,255,.88);
+}
+.card-back-label.top { top: 16px; }
+.card-back-label.bottom { bottom: 16px; }
+
+/* ===== рубашки по пакам =====
+   Пак задаётся в карточке полем pack: 'gorod' | 'lisa' | 'zima'.
+   Силуэт берётся из картинки пака: маска использует прозрачность PNG/WebP,
+   поэтому белая заливка повторяет контур рисунка. */
+
+/* Чудики: ночной смотритель с фонарём */
+.card-back[data-pack="gorod"] {
+  --back-field: #23204a;
+  --mark-ink: #23204a;
+}
+.card-back[data-pack="gorod"] .card-back-mark::before {
+  -webkit-mask-image: url("img/backs/gorod_logo.svg");
+  mask-image: url("img/backs/gorod_logo.svg");
+  -webkit-mask-size: auto 100%; mask-size: auto 100%;
+}
+
+/* Лиса.Осень: «Лиса-рябинушка» */
+.card-back[data-pack="lisa"] {
+  --back-field: #a8342a;
+  --mark-ink: #a8342a;
+}
+.card-back[data-pack="lisa"] .card-back-mark::before {
+  -webkit-mask-image: url("img/lisa/03_lisa_ryaninushka.webp");
+  mask-image: url("img/lisa/03_lisa_ryaninushka.webp");
+  -webkit-mask-size: 88%; mask-size: 88%;
+}
+
+/* Лиса.Зима: зимняя лисичка с подарком */
+.card-back[data-pack="zima"] {
+  --back-field: #2b5580;
+  --mark-ink: #2b5580;
+}
+.card-back[data-pack="zima"] .card-back-mark::before {
+  -webkit-mask-image: url("img/backs/zima_logo.png");
+  mask-image: url("img/backs/zima_logo.png");
+  -webkit-mask-size: 88%; mask-size: 88%;
 }
 
 .card-no {
@@ -220,6 +292,15 @@ html, body {
   font-size: clamp(16px, 4.6vw, 20px);
   font-weight: 600; text-align: center;
   line-height: 1.25; padding: 4px 8px 2px;
+}
+
+/* подпись на лицевой стороне — у городских чудиков */
+.card-front-desc {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(11px, 3.2vw, 13px);
+  line-height: 1.35; text-align: center;
+  color: #6b5a44; padding: 2px 10px 3px;
+  max-width: 96%;
 }
 
 .card-rarity {
@@ -289,9 +370,9 @@ html, body {
 /* Leaflet поверх тёмного фона */
 .leaflet-container { font-family: inherit; }
 
-/* «Ночная» раскраска карты: инвертируем стандартные плитки OSM */
+/* «Синяя ночь»: инверсия OSM с синеватым оттенком — светлее и контрастнее прежней */
 .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(185deg) brightness(.92) contrast(.92) saturate(.6);
+  filter: invert(.94) hue-rotate(190deg) brightness(1.18) contrast(1.04) saturate(.8);
 }
 .leaflet-control-attribution {
   background: rgba(18,16,26,.75) !important; color: #9c94ab !important; font-size: 10px !important;
@@ -359,16 +440,6 @@ html, body {
 .sheet.compact .modes { display: none; }
 .sheet.compact h2 { font-size: 17px; margin-bottom: 8px; }
 
-.card-back-desc {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 16px; line-height: 1.45; text-align: center;
-  color: #fff6e8; padding: 0 4px; max-width: 100%;
-  text-shadow: 0 1px 4px rgba(60,10,0,.4);
-}
-.card-back-hint {
-  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
-  color: rgba(222,214,255,.45);
-}
 #hud-distance {
   padding: 3px 10px; border-radius: 999px;
   background: rgba(18,16,26,.7); backdrop-filter: blur(4px);

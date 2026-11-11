@@ -2,7 +2,7 @@
    ВАЖНО: при любом изменении index.html / style.css / app.js / cards.js
    поднимай номер версии ниже (v1 -> v2), иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v5';
+const VERSION = 'wc-v10';
 
 const ASSETS = [
   './',
@@ -21,6 +21,8 @@ const ASSETS = [
   'img/1_letopisets_dvora.svg',
   'img/2-nochnoy_smotritel_fonarey.svg',
   'img/3_inspektor_pirozhkov.svg',
+  'img/backs/gorod_logo.svg',
+  'img/backs/zima_logo.png',
   'img/lisa/01_borovik.webp',
   'img/lisa/02_shapka_lisichka.webp',
   'img/lisa/03_lisa_ryaninushka.webp',

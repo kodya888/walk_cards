@@ -159,11 +159,12 @@ const els = {
   cardShell: $('card-shell'),
   cardInner: $('card-inner'),
   cardFront: $('card-front'),
+  cardFrontDesc: $('card-front-desc'),
+  cardBack: $('card-back'),
   cardNo: $('card-no'),
   cardImg: $('card-img'),
   cardName: $('card-name'),
   cardRarity: $('card-rarity'),
-  cardDesc: $('card-desc'),
   btnCardOk: $('btn-card-ok'),
   collection: $('collection'),
   collectionGrid: $('collection-grid'),
@@ -256,10 +257,22 @@ function onGeoError(err) {
 let currentCard = null;
 let cardFromGallery = false;
 
+/* у каждого пака — своя рубашка: фон, узор и круглый знак задаёт CSS
+   по data-pack. Надписей на рубашке нет. */
+
 /** Показ большой карточки. fromGallery=true — открыт из коллекции (обычный просмотр) */
 function showCard(card, fromGallery = false) {
   currentCard = card;
   cardFromGallery = fromGallery;
+  const pack = card.pack || 'gorod';
+
+  els.cardBack.dataset.pack = pack;
+
+  // подпись карточки всегда на лицевой стороне: на обороте только знак
+  const desc = card.desc || '';
+  els.cardFrontDesc.textContent = desc;
+  els.cardFrontDesc.classList.toggle('hidden', !desc);
+
   els.cardFront.classList.toggle('rare', card.rarity === 'rare');
   els.cardImg.src = card.img;
   els.cardImg.alt = card.name;
@@ -268,7 +281,6 @@ function showCard(card, fromGallery = false) {
   els.cardRarity.textContent =
     (card.rarity === 'rare' ? '★ редкая' : 'обычная') +
     (fromGallery && has > 1 ? ' · есть ×' + has : '');
-  els.cardDesc.textContent = card.desc || '';
   els.cardNo.textContent = '№ ' + String(CARDS.indexOf(card) + 1).padStart(2, '0');
   els.btnCardOk.textContent = fromGallery ? 'Вернуть в галерею' : 'Забрать';
   els.cardInner.classList.remove('flipped');

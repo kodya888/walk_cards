@@ -13,6 +13,7 @@ const CARDS = [
     id: 'letopisets',
     name: 'Летописец двора',
     img: 'img/1_letopisets_dvora.svg',
+    pack: 'gorod',
     rarity: 'common',
     desc: 'Записывает всё, что происходит во дворе с 1987 года.'
   },
@@ -20,6 +21,7 @@ const CARDS = [
     id: 'smotritel',
     name: 'Ночной смотритель фонарей',
     img: 'img/2-nochnoy_smotritel_fonarey.svg',
+    pack: 'gorod',
     rarity: 'common',
     desc: 'Знает, какой фонарь погаснет первым.'
   },
@@ -27,6 +29,7 @@ const CARDS = [
     id: 'pirozhkov',
     name: 'Инспектор пирожков',
     img: 'img/3_inspektor_pirozhkov.svg',
+    pack: 'gorod',
     rarity: 'common',
     desc: 'Проверяет начинку и следит за хрустом.'
   },
@@ -36,6 +39,7 @@ const CARDS = [
     id: 'letopisets-rare',
     name: 'Летописец двора',
     img: 'img/1_letopisets_dvora.svg',
+    pack: 'gorod',
     rarity: 'rare',
     desc: 'Первый лист его летописи. Говорят, приносит удачу в поисках.'
   },
@@ -43,6 +47,7 @@ const CARDS = [
     id: 'smotritel-rare',
     name: 'Ночной смотритель фонарей',
     img: 'img/2-nochnoy_smotritel_fonarey.svg',
+    pack: 'gorod',
     rarity: 'rare',
     desc: 'Единственный, кто видел, как зажигается самый первый фонарь.'
   },
@@ -50,6 +55,7 @@ const CARDS = [
     id: 'pirozhkov-rare',
     name: 'Инспектор пирожков',
     img: 'img/3_inspektor_pirozhkov.svg',
+    pack: 'gorod',
     rarity: 'rare',
     desc: 'Золотой значок за безупречную проверку 10 000 пирожков.'
   },
