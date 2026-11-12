@@ -21,7 +21,7 @@
    Задаём гарантированный отступ сверху (max выберет большее) */
 @media (display-mode: standalone) {
   :root {
-    --safe-t: max(env(safe-area-inset-top, 0px), 30px);
+    --safe-t: max(env(safe-area-inset-top, 0px), 44px);
   }
 }
 
@@ -135,7 +135,7 @@ html, body {
    подъём, чтобы кнопка не пряталась за панелью */
 .fab {
   position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(20px + max(var(--safe-b), 36px)); z-index: 400;
+  bottom: calc(20px + max(var(--safe-b), 52px)); z-index: 400;
   padding: 16px 30px; border: none; border-radius: 999px;
   background: linear-gradient(135deg, #7c5cff, #a06bff);
   color: #fff; font-size: 16px; font-weight: 700; font-family: inherit;
@@ -143,7 +143,7 @@ html, body {
 }
 /* установленное приложение: панелей браузера нет, хватает системного отступа */
 @media (display-mode: standalone) {
-  .fab { bottom: calc(20px + max(var(--safe-b), 12px)); }
+  .fab { bottom: calc(20px + max(var(--safe-b), 32px)); }
 }
 
 /* ===== карточка ===== */
