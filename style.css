@@ -130,13 +130,20 @@ html, body {
 #point-tools { margin: 14px 0 4px; }
 
 /* ===== FAB ===== */
+/* в браузере (Samsung Internet) нижняя панель браузера рисуется поверх
+   контента, а env(safe-area-inset-bottom) приходит 0 — задаём гарантированный
+   подъём, чтобы кнопка не пряталась за панелью */
 .fab {
   position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(20px + var(--safe-b)); z-index: 400;
+  bottom: calc(20px + max(var(--safe-b), 36px)); z-index: 400;
   padding: 16px 30px; border: none; border-radius: 999px;
   background: linear-gradient(135deg, #7c5cff, #a06bff);
   color: #fff; font-size: 16px; font-weight: 700; font-family: inherit;
   box-shadow: 0 8px 28px rgba(124,92,255,.45); cursor: pointer;
+}
+/* установленное приложение: панелей браузера нет, хватает системного отступа */
+@media (display-mode: standalone) {
+  .fab { bottom: calc(20px + max(var(--safe-b), 12px)); }
 }
 
 /* ===== карточка ===== */

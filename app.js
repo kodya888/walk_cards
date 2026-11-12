@@ -799,7 +799,7 @@ function openNavigation() {
 function openSheet() {
   els.startSheet.classList.remove('hidden', 'compact');
   els.btnOpenSheet.classList.add('hidden');
-  els.btnStart.textContent = 'Начать поиск';
+  els.btnStart.textContent = 'Начать квест';
   // сброс выбора
   [...els.modes.children].forEach(b => b.classList.remove('selected'));
   els.pointTools.classList.add('hidden');
