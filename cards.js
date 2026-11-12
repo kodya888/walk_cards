@@ -423,39 +423,47 @@ const PACK_BY_KEY = Object.fromEntries(PACKS.map(p => [p.key, p]));
 const CARD_BY_ID = Object.fromEntries(CARDS.map(c => [c.id, c]));
 
 /**
- * Выбрать карточку-награду.
+ * Награда за прогулку — несколько карточек, по одной из каждого пака,
+ * где остались несобранные карточки.
  * mode: 'circle' | 'point' | 'route'
  * frac: насколько далеко ушёл от минимума (0..1) — чем дальше, тем выше шанс редкой
  *
- * Правило: пока в паке есть несобранные карточки, дубли из него не падают.
- * Пак выбирается случайно среди недособранных, внутри пака — случайная карточка.
- * Когда все паки собраны — снова падают любые.
+ * Правила:
+ *  - собранный пак («Коллекция собрана») больше не выпадает вообще — дублей нет;
+ *  - недособранных паков 3 → падают 3 карточки, меньше → падает столько же;
+ *  - когда собраны ВСЕ паки — падают сразу 3 любые карточки (дубли);
+ *  - внутри пака карточка случайная, шанс редкой зависит от mode:
+ *    'route' — всегда редкая, 'point' — 15–50 % по frac, иначе обычная.
  */
-function pickReward(mode, frac = 0) {
+function pickRewards(mode, frac = 0) {
   const owns = (typeof state !== 'undefined' && state.collection) || {};
   const notOwned = c => !(owns[c.id] > 0);
 
-  const packs = [...new Set(CARDS.map(c => c.pack || 'gorod'))]
-    .filter(p => CARDS.some(c => (c.pack || 'gorod') === p && notOwned(c)));
+  let rareChance = 0;
+  if (mode === 'point') rareChance = 0.15 + 0.35 * frac;   // 15–50 %
+  if (mode === 'route') rareChance = 1;                     // маршрут — всегда редкая
 
-  let pool = [];
-  if (packs.length) {
-    // карточки падают из каждого пака, пока его коллекция не собрана:
-    // пак — случайный среди недособранных, порядок внутри — случайный
-    const pack = packs[Math.floor(Math.random() * packs.length)];
+  const pickFromPack = pack => {
     const inPack = CARDS.filter(c => (c.pack || 'gorod') === pack && notOwned(c));
     const commons = inPack.filter(c => c.rarity === 'common');
     const rares   = inPack.filter(c => c.rarity === 'rare');
-
-    let rareChance = 0;
-    if (mode === 'point') rareChance = 0.15 + 0.35 * frac;   // 15–50 %
-    if (mode === 'route') rareChance = 1;                     // маршрут — всегда редкая
-
-    pool = (Math.random() < rareChance) ? rares : commons;
+    let pool = (Math.random() < rareChance) ? rares : commons;
     if (!pool.length) pool = rares.length ? rares : commons;
-  }
+    return pool[Math.floor(Math.random() * pool.length)];
+  };
 
-  // совсем всё собрано — падают любые (дубли)
-  if (!pool.length) pool = CARDS;
-  return pool[Math.floor(Math.random() * pool.length)];
+  // паки, где остались несобранные карточки, в случайном порядке
+  const packs = [...new Set(CARDS.map(c => c.pack || 'gorod'))]
+    .filter(p => CARDS.some(c => (c.pack || 'gorod') === p && notOwned(c)))
+    .sort(() => Math.random() - 0.5);
+
+  const out = packs.slice(0, 3).map(pickFromPack);
+
+  // всё собрано — три дубля из любых
+  if (!out.length) {
+    for (let i = 0; i < 3; i++) {
+      out.push(CARDS[Math.floor(Math.random() * CARDS.length)]);
+    }
+  }
+  return out;
 }

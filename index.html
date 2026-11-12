@@ -10,7 +10,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 
@@ -88,6 +88,14 @@
   <button id="btn-card-ok" class="primary-btn">Забрать</button>
 </div>
 
+<!-- оверлей награды: до трёх карточек рубашкой вверх, открываются тапом -->
+<div id="reward-overlay" class="overlay hidden">
+  <h2 class="reward-title">Награда за прогулку</h2>
+  <div id="reward-row" class="reward-row"></div>
+  <p class="tap-hint" id="reward-hint">Нажимай на карточки — они откроются</p>
+  <button id="btn-reward-ok" class="primary-btn hidden">Забрать</button>
+</div>
+
 <!-- коллекция: сначала список паков, внутри пака — его карточки -->
 <div id="collection" class="overlay hidden">
   <div class="collection-head">
@@ -119,7 +127,7 @@
 </div>
 
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="cards.js?v=12"></script>
-<script src="app.js?v=12"></script>
+<script src="cards.js?v=13"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@ const CFG = {
   TICK_MS: 4000,          // как часто обрабатывать позицию
   ROUTE_LEN: 2,           // точек в маршруте на текущем уровне
   ROUTE_UNLOCK_WALKS: 3,  // после скольких прогулок открывается маршрут
+  LIMITS_ENABLED: false,  // дневной лимит выключен (для теста; вернуть, когда появится монетизация)
   LIMIT_TIERS: [          // дневной лимит карточек по «прокачке» (всего прогулок)
     { from: 0,  limit: 2 },
     { from: 5,  limit: 3 },
@@ -82,6 +83,7 @@ function rollDay() {
 }
 
 function dailyLimit() {
+  if (!CFG.LIMITS_ENABLED) return Infinity;
   let limit = CFG.LIMIT_TIERS[0].limit;
   CFG.LIMIT_TIERS.forEach(t => { if (state.walks >= t.from) limit = t.limit; });
   return limit;
@@ -175,6 +177,10 @@ const els = {
   btnCollectionBack: $('btn-collection-back'),
   btnCollectionClose: $('btn-collection-close'),
   completeOverlay: $('complete-overlay'),
+  rewardOverlay: $('reward-overlay'),
+  rewardRow: $('reward-row'),
+  rewardHint: $('reward-hint'),
+  btnRewardOk: $('btn-reward-ok'),
   btnCompleteOk: $('btn-complete-ok'),
   debug: $('debug'),
   btnSim350: $('btn-sim-350'),
@@ -310,6 +316,59 @@ function hideCard() {
     els.collection.classList.remove('hidden');
   } else if (pendingComplete) {
     // это была последняя карточка — поздравляем
+    pendingComplete = false;
+    els.completeOverlay.classList.remove('hidden');
+  }
+}
+
+/* ---------------- награда за прогулку: открытие карточек ---------------- */
+
+/* Три (или сколько осталось паков) карточки падают рубашкой вверх.
+   Тап по карточке переворачивает её. Когда открыты все — кнопка «Забрать». */
+
+function showRewards(cards) {
+  let opened = 0;
+  els.rewardRow.innerHTML = '';
+  els.btnRewardOk.classList.add('hidden');
+  els.rewardHint.classList.remove('hidden');
+
+  cards.forEach(card => {
+    const pack = card.pack || 'gorod';
+    const no = String(CARDS.indexOf(card) + 1).padStart(2, '0');
+    const shell = document.createElement('div');
+    shell.className = 'reward-shell';
+    shell.innerHTML =
+      '<div class="card-inner flipped">' +
+        '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + '" data-pack="' + pack + '">' +
+          '<span class="card-no">№ ' + no + '</span>' +
+          '<div class="card-scene"><img src="' + card.img + '" alt=""></div>' +
+          '<div class="card-text">' + card.name + '</div>' +
+          '<span class="card-rarity">' + (card.rarity === 'rare' ? '★ редкая' : 'обычная') + '</span>' +
+        '</div>' +
+        '<div class="face card-back" data-pack="' + pack + '">' +
+          '<div class="card-back-inner"><div class="card-back-mark"></div></div>' +
+        '</div>' +
+      '</div>';
+    shell.addEventListener('click', () => {
+      if (shell.classList.contains('opened')) return;
+      shell.classList.add('opened');
+      shell.querySelector('.card-inner').classList.remove('flipped');
+      opened++;
+      if (opened === cards.length) {
+        els.rewardHint.classList.add('hidden');
+        els.btnRewardOk.classList.remove('hidden');
+      }
+    });
+    els.rewardRow.appendChild(shell);
+  });
+
+  els.rewardOverlay.classList.remove('hidden');
+}
+
+function hideRewards() {
+  els.rewardOverlay.classList.add('hidden');
+  if (pendingComplete) {
+    // всё собрано — после награды показываем поздравление
     pendingComplete = false;
     els.completeOverlay.classList.remove('hidden');
   }
@@ -695,12 +754,14 @@ function finishWalk() {
   }
 
   const wasComplete = CARDS.every(c => (state.collection[c.id] || 0) > 0);
-  const card = pickReward(mode, frac);
-  state.collection[card.id] = (state.collection[card.id] || 0) + 1;
-  // последняя выпавшая карточка — всегда первая в галерее:
-  // убираем её из старой позиции и дописываем в конец order
-  state.order = (state.order || []).filter(id => id !== card.id);
-  state.order.push(card.id);
+  const cards = pickRewards(mode, frac);   // до 3 карточек, по одной из пака
+  cards.forEach(card => {
+    state.collection[card.id] = (state.collection[card.id] || 0) + 1;
+    // последняя выпавшая карточка — всегда первая в галерее:
+    // убираем её из старой позиции и дописываем в конец order
+    state.order = (state.order || []).filter(id => id !== card.id);
+    state.order.push(card.id);
+  });
   if (!wasComplete && CARDS.every(c => (state.collection[c.id] || 0) > 0)) {
     pendingComplete = true;
   }
@@ -715,7 +776,7 @@ function finishWalk() {
   els.btnOpenSheet.classList.remove('hidden');
 
   renderStats();
-  showCard(card);
+  showRewards(cards);
 }
 
 /* ---------------- навигация ----------------
@@ -747,11 +808,13 @@ function openSheet() {
   const away = state.home && me ? haversine(me, state.home) : 0;
   const left = cardsLeftToday();
   const lim = dailyLimit();
-  const limText = `Сегодня: ${lim - left} из ${lim} карточек`;
+  const limText = isFinite(lim)
+    ? `Сегодня: ${lim - left} из ${lim} карточек`
+    : `Сегодня: ${state.walksToday || 0} карточек`;
   els.modeHint.textContent =
     (away > CFG.CIRCLE_R ? `Ты в ${fmtDist(away)} от дома — выбери, каким путём вернёшься.` : '') +
     ` ${limText}.` +
-    (left > 0 ? '' : ' Лимит исчерпан — новая карточка завтра.');
+    (!isFinite(lim) || left > 0 ? '' : ' Лимит исчерпан — новая карточка завтра.');
 
   if (state.home) {
     homeLayer.clearLayers();
@@ -838,6 +901,7 @@ function bindUi() {
 
   els.cardInner.addEventListener('click', () => els.cardInner.classList.toggle('flipped'));
   els.btnCardOk.addEventListener('click', hideCard);
+  els.btnRewardOk.addEventListener('click', hideRewards);
 
   els.btnCollection.addEventListener('click', () => {
     renderCollection();               // открываем со списка коллекций
