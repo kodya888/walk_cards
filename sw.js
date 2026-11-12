@@ -3,14 +3,14 @@
    поднимай номер версии (ниже и в ?v=... у тегов в index.html),
    иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v18';
+const VERSION = 'wc-v20';
 
 const ASSETS = [
   './',
   'index.html',
-  'style.css?v=18',
-  'app.js?v=18',
-  'cards.js?v=18',
+  'style.css?v=19',
+  'app.js?v=19',
+  'cards.js?v=19',
   'manifest.json',
   'vendor/leaflet/leaflet.css',
   'vendor/leaflet/leaflet.js',
@@ -73,6 +73,23 @@ const ASSETS = [
   'img/zima/22_snezhny_angel.webp',
   'img/zima/23_nablyudatel_u_okna.webp',
   'img/zima/24_passazhir_s_kakao.webp',
+  'img/kot/01_domashniy_abazhur.webp',
+  'img/kot/02_razbivatel_servizov.webp',
+  'img/kot/03_kot_v_korobke.webp',
+  'img/kot/04_shtornyy_pirat.webp',
+  'img/kot/05_inspektor_akvariuma.webp',
+  'img/kot/06_master_puhovyh_bur.webp',
+  'img/kot/07_schastlivyy_rybolov.webp',
+  'img/kot/08_pobeditel_podushek.webp',
+  'img/kot/09_gurman_iz_vedra.webp',
+  'img/kot/10_mumiya_nevidimka.webp',
+  'img/kot/11_uznik_klubka.webp',
+  'img/kot/12_zhertva_banana.webp',
+  'img/kot/13_domashnyaya_girlyanda.webp',
+  'img/kot/14_sadovnik_pod_gorshkom.webp',
+  'img/kot/15_korol_pylesosov.webp',
+  'img/kot/16_otpusk_v_tazu.webp',
+  'img/kot/17_banochnyy_perepoloh.webp',
   'icons/icon-192.png',
   'icons/icon-512.png'
 ];

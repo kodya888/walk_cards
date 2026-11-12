@@ -3,7 +3,7 @@
    ---------------------------------------------------------
    Чтобы добавить нового чудика:
    1) положи его картинку в img/ (лучше SVG или WebP — лёгкие)
-   2) добавь запись ниже; поле pack: 'gorod' | 'lisa' | 'zima'
+   2) добавь запись ниже; поле pack: 'gorod' | 'lisa' | 'zima' | 'kot'
    Идентификатор (id) должен быть уникальным.
    Поле desc необязательное: если его нет, карточка показывает
    только название и редкость.
@@ -409,6 +409,128 @@ const CARDS = [
     img: 'img/zima/24_passazhir_s_kakao.webp',
     pack: 'zima',
     rarity: 'common'
+  },
+
+  /* --- ПАК 4 «Озорной кот»: домашний кот и его проделки,
+         без описаний — только названия --- */
+  {
+    id: 'domashniy-abazhur',
+    name: 'Домашний абажур',
+    img: 'img/kot/01_domashniy_abazhur.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'razbivatel-servizov',
+    name: 'Разбиватель сервизов',
+    img: 'img/kot/02_razbivatel_servizov.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'kot-v-korobke',
+    name: 'Хозяин коробки',
+    img: 'img/kot/03_kot_v_korobke.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'shtornyy-pirat',
+    name: 'Шторный пират',
+    img: 'img/kot/04_shtornyy_pirat.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'inspektor-akvariuma',
+    name: 'Инспектор аквариума',
+    img: 'img/kot/05_inspektor_akvariuma.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'master-puhovyh-bur',
+    name: 'Мастер пуховых бурь',
+    img: 'img/kot/06_master_puhovyh_bur.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'schastlivyy-rybolov',
+    name: 'Счастливый рыболов',
+    img: 'img/kot/07_schastlivyy_rybolov.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'pobeditel-podushek',
+    name: 'Победитель подушек',
+    img: 'img/kot/08_pobeditel_podushek.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'gurman-iz-vedra',
+    name: 'Гурман из ведра',
+    img: 'img/kot/09_gurman_iz_vedra.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'mumiya-nevidimka',
+    name: 'Мумия-невидимка',
+    img: 'img/kot/10_mumiya_nevidimka.webp',
+    pack: 'kot',
+    rarity: 'rare'
+  },
+  {
+    id: 'uznik-klubka',
+    name: 'Узник клубка',
+    img: 'img/kot/11_uznik_klubka.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'zhertva-banana',
+    name: 'Жертва банана',
+    img: 'img/kot/12_zhertva_banana.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'domashnyaya-girlyanda',
+    name: 'Домашняя гирлянда',
+    img: 'img/kot/13_domashnyaya_girlyanda.webp',
+    pack: 'kot',
+    rarity: 'rare'
+  },
+  {
+    id: 'sadovnik-pod-gorshkom',
+    name: 'Садовник под горшком',
+    img: 'img/kot/14_sadovnik_pod_gorshkom.webp',
+    pack: 'kot',
+    rarity: 'common'
+  },
+  {
+    id: 'korol-pylesosov',
+    name: 'Король пылесосов',
+    img: 'img/kot/15_korol_pylesosov.webp',
+    pack: 'kot',
+    rarity: 'rare'
+  },
+  {
+    id: 'otpusk-v-tazu',
+    name: 'Отпуск в тазу',
+    img: 'img/kot/16_otpusk_v_tazu.webp',
+    pack: 'kot',
+    rarity: 'rare'
+  },
+  {
+    id: 'banochnyy-perepoloh',
+    name: 'Баночный переполох',
+    img: 'img/kot/17_banochnyy_perepoloh.webp',
+    pack: 'kot',
+    rarity: 'common'
   }
 ];
 
@@ -416,7 +538,8 @@ const CARDS = [
 const PACKS = [
   { key: 'gorod', title: 'Чудики' },
   { key: 'lisa',  title: 'Лисичка.Осень' },
-  { key: 'zima',  title: 'Лис.Зима' }
+  { key: 'zima',  title: 'Лис.Зима' },
+  { key: 'kot',   title: 'Озорной кот' }
 ];
 const PACK_BY_KEY = Object.fromEntries(PACKS.map(p => [p.key, p]));
 

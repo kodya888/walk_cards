@@ -323,18 +323,20 @@ function hideCard() {
 
 /* ---------------- награда за прогулку: открытие карточек ---------------- */
 
-/* Три (или сколько осталось паков) карточки падают рубашкой вверх.
-   Тап по карточке переворачивает её. Когда открыты все — кнопка «Забрать». */
+/* Карточки падают по одной, рубашкой вверх, в большом размере.
+   Тап — карточка переворачивается, через паузу улетает вверх,
+   падает следующая. Последняя остаётся открытой, появляется «Забрать». */
 
 function showRewards(cards) {
-  let opened = 0;
-  els.rewardRow.innerHTML = '';
+  let idx = 0;
   els.btnRewardOk.classList.add('hidden');
   els.rewardHint.classList.remove('hidden');
 
-  cards.forEach(card => {
+  function renderCurrent() {
+    const card = cards[idx];
     const pack = card.pack || 'gorod';
     const no = String(CARDS.indexOf(card) + 1).padStart(2, '0');
+    els.rewardRow.innerHTML = '';
     const shell = document.createElement('div');
     shell.className = 'reward-shell';
     shell.innerHTML =
@@ -353,15 +355,23 @@ function showRewards(cards) {
       if (shell.classList.contains('opened')) return;
       shell.classList.add('opened');
       shell.querySelector('.card-inner').classList.remove('flipped');
-      opened++;
-      if (opened === cards.length) {
-        els.rewardHint.classList.add('hidden');
+      els.rewardHint.classList.add('hidden');
+      if (idx + 1 < cards.length) {
+        // пауза на просмотр открытой карточки, затем улёт и следующая
+        setTimeout(() => {
+          shell.classList.add('fly-out');
+          idx++;
+          setTimeout(renderCurrent, 500);
+        }, 800);
+      } else {
+        // последняя карточка — остаётся открытой, можно забирать
         els.btnRewardOk.classList.remove('hidden');
       }
     });
     els.rewardRow.appendChild(shell);
-  });
+  }
 
+  renderCurrent();
   els.rewardOverlay.classList.remove('hidden');
 }
 
