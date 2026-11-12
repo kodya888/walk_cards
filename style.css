@@ -134,7 +134,7 @@ html, body {
    стоит ровно на том же уровне, что и «Начать квест» в шторке */
 .fab {
   position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(18px + var(--safe-b)); z-index: 400;
+  bottom: calc(30px + max(var(--safe-b), 14px)); z-index: 400;
   padding: 16px 30px; border: none; border-radius: 999px;
   background: linear-gradient(135deg, #7c5cff, #a06bff);
   color: #fff; font-size: 16px; font-weight: 700; font-family: inherit;
