@@ -168,6 +168,7 @@ const els = {
   cardName: $('card-name'),
   cardRarity: $('card-rarity'),
   btnCardOk: $('btn-card-ok'),
+  cardHint: $('card-hint'),
   collection: $('collection'),
   collectionTitle: $('collection-title'),
   collectionGrid: $('collection-grid'),
@@ -269,6 +270,15 @@ function onGeoError(err) {
 let currentCard = null;
 let cardFromGallery = false;
 let pendingComplete = false;   // собрана последняя карточка — показать поздравление после неё
+let galleryList = [];          // карточки открытого пака в галерее — порядок как на экране
+let galleryIndex = -1;         // какая из них показана в большом оверлее
+
+function swipeGallery(step) {
+  // листание по кругу: от последней — к первой и наоборот
+  if (!cardFromGallery || !galleryList.length) return;
+  galleryIndex = (galleryIndex + step + galleryList.length) % galleryList.length;
+  showCard(galleryList[galleryIndex], true);
+}
 
 /* у каждого пака — своя рубашка: фон, узор и круглый знак задаёт CSS
    по data-pack. Надписей на рубашке нет. */
@@ -277,6 +287,7 @@ let pendingComplete = false;   // собрана последняя карточ
 function showCard(card, fromGallery = false) {
   currentCard = card;
   cardFromGallery = fromGallery;
+  if (fromGallery) galleryIndex = galleryList.indexOf(card);
   const pack = card.pack || 'gorod';
 
   els.cardBack.dataset.pack = pack;
@@ -298,6 +309,9 @@ function showCard(card, fromGallery = false) {
     (fromGallery && has > 1 ? ' · есть ×' + has : '');
   els.cardNo.textContent = '№ ' + String(CARDS.indexOf(card) + 1).padStart(2, '0');
   els.btnCardOk.textContent = fromGallery ? 'Вернуть в галерею' : 'Забрать';
+  els.cardHint.textContent = fromGallery
+    ? 'Листай влево-вправо · тап — перевернуть'
+    : 'Нажми на карточку — она перевернётся';
   els.cardInner.classList.remove('flipped');
 
   els.cardOverlay.classList.remove('hidden');
@@ -324,12 +338,13 @@ function hideCard() {
 /* ---------------- награда за прогулку: открытие карточек ---------------- */
 
 /* Карточки падают по одной, рубашкой вверх, в большом размере.
-   Тап — карточка переворачивается, через паузу улетает вверх,
-   падает следующая. Последняя остаётся открытой, появляется «Забрать». */
+   Первый тап — карточка переворачивается. Второй тап — улетает вверх,
+   падает следующая. Последняя улетела — появляется «Забрать». */
 
 function showRewards(cards) {
   let idx = 0;
   els.btnRewardOk.classList.add('hidden');
+  els.rewardHint.textContent = 'Нажми на карточку — она откроется';
   els.rewardHint.classList.remove('hidden');
 
   function renderCurrent() {
@@ -352,19 +367,19 @@ function showRewards(cards) {
         '</div>' +
       '</div>';
     shell.addEventListener('click', () => {
-      if (shell.classList.contains('opened')) return;
-      shell.classList.add('opened');
-      shell.querySelector('.card-inner').classList.remove('flipped');
-      els.rewardHint.classList.add('hidden');
+      // первый тап — открыть, второй тап — улетела
+      if (!shell.classList.contains('opened')) {
+        shell.classList.add('opened');
+        shell.querySelector('.card-inner').classList.remove('flipped');
+        els.rewardHint.textContent = 'Нажми ещё раз — она улетит';
+        return;
+      }
+      shell.classList.add('fly-out');
       if (idx + 1 < cards.length) {
-        // пауза на просмотр открытой карточки, затем улёт и следующая
-        setTimeout(() => {
-          shell.classList.add('fly-out');
-          idx++;
-          setTimeout(renderCurrent, 500);
-        }, 800);
+        idx++;
+        setTimeout(renderCurrent, 500);
       } else {
-        // последняя карточка — остаётся открытой, можно забирать
+        // последняя карточка — появляется «Забрать»
         els.btnRewardOk.classList.remove('hidden');
       }
     });
@@ -459,6 +474,9 @@ function openPack(key) {
     .filter(id => CARD_BY_ID[id] && state.collection[id] > 0 &&
                   (CARD_BY_ID[id].pack || 'gorod') === key)
     .reverse();
+
+  // список для листания влево-вправо в большом оверлее
+  galleryList = order.map(id => CARD_BY_ID[id]);
 
   if (!order.length) {
     const p = document.createElement('p');
@@ -911,6 +929,29 @@ function bindUi() {
 
   els.cardInner.addEventListener('click', () => els.cardInner.classList.toggle('flipped'));
   els.btnCardOk.addEventListener('click', hideCard);
+
+  // листание большой карточки свайпом влево-вправо (из галереи)
+  let swipeX = null, swipeY = null;
+  els.cardOverlay.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0];
+    swipeX = t.clientX; swipeY = t.clientY;
+  }, { passive: true });
+  els.cardOverlay.addEventListener('touchend', e => {
+    if (swipeX === null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - swipeX, dy = t.clientY - swipeY;
+    swipeX = null;
+    if (!cardFromGallery) return;
+    // короткий или вертикальный жест не считается: это тап или скролл
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+    swipeGallery(dx < 0 ? 1 : -1);   // влево — следующая, вправо — предыдущая
+  });
+  // то же с клавиатуры, чтобы проверять на компе
+  document.addEventListener('keydown', e => {
+    if (els.cardOverlay.classList.contains('hidden') || !cardFromGallery) return;
+    if (e.key === 'ArrowRight') swipeGallery(1);
+    if (e.key === 'ArrowLeft') swipeGallery(-1);
+  });
   els.btnRewardOk.addEventListener('click', hideRewards);
 
   els.btnCollection.addEventListener('click', () => {
