@@ -411,7 +411,7 @@ function makeMiniCard(card) {
   const ownedCount = state.collection[card.id] || 0;
   const el = document.createElement('div');
   el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
-  el.innerHTML = `<img src="${card.img}" alt=""><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
+  el.innerHTML = `<img src="${card.img}" alt="" loading="lazy" decoding="async"><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
   if (ownedCount > 1) {
     const badge = document.createElement('span');
     badge.className = 'mini-count';
