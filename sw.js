@@ -3,7 +3,7 @@
    поднимай номер версии (ниже и в ?v=... у тегов в index.html),
    иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v27';
+const VERSION = 'wc-v28';
 
 const ASSETS = [
   './',
@@ -91,7 +91,9 @@ const ASSETS = [
   'img/kot/16_otpusk_v_tazu.webp',
   'img/kot/17_banochnyy_perepoloh.webp',
   'icons/icon-192.png',
-  'icons/icon-512.png'
+  'icons/icon-512.png',
+  'icons/icon-192-maskable.png',
+  'icons/icon-512-maskable.png'
 ];
 
 self.addEventListener('install', e => {
