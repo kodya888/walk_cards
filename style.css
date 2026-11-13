@@ -417,6 +417,22 @@ html, body {
   to { opacity: 0; transform: translateY(-110px) scale(.72) rotate(8deg); }
 }
 
+/* все карточки выпали: горизонтальный ряд мини-карточек лицом вверх.
+   flex:none — иначе ряд сжимает карточки и длинные слова не влезают */
+.reward-row.mini { gap: 12px; }
+.reward-mini {
+  flex: none;
+  width: min(calc((100vw - 76px) / 3), 118px);
+  aspect-ratio: 2/3;
+  position: relative; perspective: 800px;
+  animation: card-drop .45s cubic-bezier(.2,.9,.25,1.1) backwards;
+}
+.reward-mini .card-no { top: 5px; font-size: 8px; }
+.reward-mini .card-front { padding: 10px 6px 6px; box-shadow: 0 8px 24px rgba(0,0,0,.45), inset 0 0 20px rgba(184,134,11,.12); }
+.reward-mini .card-scene { padding: 12px 3px 2px; }
+.reward-mini .card-text { font-size: 11px; line-height: 1.2; padding: 2px 4px 0; overflow-wrap: anywhere; }
+.reward-mini .card-rarity { font-size: 8px; padding-bottom: 3px; }
+
 .grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 10px; width: 100%; margin-top: 14px;

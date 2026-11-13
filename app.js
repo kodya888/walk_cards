@@ -346,6 +346,7 @@ function showRewards(cards) {
   els.btnRewardOk.classList.add('hidden');
   els.rewardHint.textContent = 'Нажми на карточку — она откроется';
   els.rewardHint.classList.remove('hidden');
+  els.rewardRow.classList.remove('mini');
 
   function renderCurrent() {
     const card = cards[idx];
@@ -379,11 +380,55 @@ function showRewards(cards) {
         idx++;
         setTimeout(renderCurrent, 500);
       } else {
-        // последняя карточка — появляется «Забрать»
-        els.btnRewardOk.classList.remove('hidden');
+        // все карточки выпали — показываем их горизонтальный ряд
+        setTimeout(renderMiniRow, 500);
       }
     });
     els.rewardRow.appendChild(shell);
+  }
+
+  /* финал награды: маленькие карточки лицом вверх в ряд, падают по очереди */
+  function renderMiniRow() {
+    els.rewardRow.innerHTML = '';
+    els.rewardRow.classList.add('mini');
+    els.rewardHint.textContent = 'Прогулка принесла:';
+    cards.forEach((card, i) => {
+      const pack = card.pack || 'gorod';
+      const no = String(CARDS.indexOf(card) + 1).padStart(2, '0');
+      const shell = document.createElement('div');
+      shell.className = 'reward-mini';
+      shell.style.animationDelay = (i * 0.12).toFixed(2) + 's';
+      shell.innerHTML =
+        '<div class="card-inner">' +
+          '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + '" data-pack="' + pack + '">' +
+            '<span class="card-no">№ ' + no + '</span>' +
+            '<div class="card-scene"><img src="' + card.img + '" loading="lazy" alt=""></div>' +
+            '<div class="card-text">' + card.name + '</div>' +
+            '<span class="card-rarity">' + (card.rarity === 'rare' ? '★ редкая' : 'обычная') + '</span>' +
+          '</div>' +
+        '</div>';
+      els.rewardRow.appendChild(shell);
+    });
+    // подгоняем шрифт названий: самое длинное слово должно влезать
+    // в мини-карточку, уменьшаем шрифт пропорционально (максимум 11px, пол 6.5px)
+    els.rewardRow.querySelectorAll('.reward-mini').forEach(m => {
+      const t = m.querySelector('.card-text');
+      const inner = t.clientWidth - 9;              // паддинги 2px 4px + запас
+      if (inner < 20) return;
+      const cs = getComputedStyle(t);
+      const probe = document.createElement('span');
+      probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-weight:' + cs.fontWeight + ';font-family:' + cs.fontFamily + ';font-size:11px';
+      document.body.appendChild(probe);
+      let maxW = 0;
+      t.textContent.split(/\s+/).forEach(w => {
+        probe.textContent = w;
+        const wd = probe.getBoundingClientRect().width;
+        if (wd > maxW) maxW = wd;
+      });
+      probe.remove();
+      if (maxW > inner) t.style.fontSize = Math.max(6.5, Math.floor(11 * inner / maxW * 10) / 10) + 'px';
+    });
+    els.btnRewardOk.classList.remove('hidden');
   }
 
   renderCurrent();
@@ -739,6 +784,14 @@ function tick(force) {
 function success() {
   const a = state.active;
   if (!a) return;
+
+  /* вибрация события (Android Chrome; iOS Safari не поддерживает — молча пропускаем).
+     Выход за круг — двойной «тук-тук», вход в точку — три коротких. */
+  try {
+    if (navigator.vibrate) {
+      navigator.vibrate(a.mode === 'circle' ? [110, 100, 110] : [90, 80, 90, 80, 90]);
+    }
+  } catch (e) { /* вибрация недоступна — не важно */ }
 
   if (a.mode === 'route' && a.index < a.route.length - 1) {
     a.index++;
