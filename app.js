@@ -33,6 +33,7 @@ const STORE_KEY = 'walk_cards_v1';
 let state = {
   collection: {},                 // id карточки -> сколько раз попадалась
   order: [],                      // id карточек в порядке получения (для галереи)
+  giftsAccepted: [],              // канонические подарочные коды, принятые на этом телефоне
   walks: 0,
   walksToday: 0,                  // карточек за сегодня
   day: '',                        // 'ГГГГ-ММ-ДД' — сброс дневного счётчика
@@ -54,6 +55,7 @@ function load() {
     }
   } catch (e) {}
   state.unlocked.route = state.walks >= CFG.ROUTE_UNLOCK_WALKS;
+  if (!Array.isArray(state.giftsAccepted)) state.giftsAccepted = [];
   if (!Array.isArray(state.order)) {          // переход со старой версии
     state.order = CARDS.filter(c => state.collection[c.id] > 0).map(c => c.id);
   }
@@ -183,6 +185,25 @@ const els = {
   rewardHint: $('reward-hint'),
   btnRewardOk: $('btn-reward-ok'),
   btnCompleteOk: $('btn-complete-ok'),
+  btnGift: $('btn-gift'),
+  btnCardGift: $('btn-card-gift'),
+  giftOverlay: $('gift-overlay'),
+  giftConfirmView: $('gift-confirm-view'),
+  giftCodeView: $('gift-code-view'),
+  giftInputView: $('gift-input-view'),
+  giftCardname: $('gift-cardname'),
+  giftWarn: $('gift-warn'),
+  giftCodeName: $('gift-code-name'),
+  giftCode: $('gift-code'),
+  giftInput: $('gift-input'),
+  giftMsg: $('gift-msg'),
+  btnGiftYes: $('btn-gift-yes'),
+  btnGiftNo: $('btn-gift-no'),
+  btnGiftCopy: $('btn-gift-copy'),
+  btnGiftShare: $('btn-gift-share'),
+  btnGiftDone: $('btn-gift-done'),
+  btnGiftAccept: $('btn-gift-accept'),
+  btnGiftCancel: $('btn-gift-cancel'),
   debug: $('debug'),
   btnSim350: $('btn-sim-350'),
   btnSimTarget: $('btn-sim-to-target')
@@ -196,6 +217,7 @@ let layerGroup = null;      // всё, что относится к текуще
 let homeLayer = null;       // «призрак» дома на карте (куда вернуться)
 let draft = null;           // черновик точки до старта
 let chosenMode = 'circle';
+let openPackKey = null;     // какой пак открыт в галерее (null — список паков)
 
 let me = null;              // {lat,lng,acc}
 let simulate = false;       // включён ли симулятор
@@ -309,6 +331,7 @@ function showCard(card, fromGallery = false) {
     (fromGallery && has > 1 ? ' · есть ×' + has : '');
   els.cardNo.textContent = '№ ' + String(CARDS.indexOf(card) + 1).padStart(2, '0');
   els.btnCardOk.textContent = fromGallery ? 'Вернуть в галерею' : 'Забрать';
+  els.btnCardGift.classList.toggle('hidden', !fromGallery);
   els.cardHint.textContent = fromGallery
     ? 'Листай влево-вправо · тап — перевернуть'
     : 'Нажми на карточку — она перевернётся';
@@ -478,6 +501,7 @@ function renderCollection() {
   els.btnCollectionBack.classList.add('hidden');
   els.packView.classList.add('hidden');
   els.packsList.classList.remove('hidden');
+  openPackKey = null;
   els.packsList.innerHTML = '';
 
   PACKS.forEach(p => {
@@ -509,6 +533,7 @@ function openPack(key) {
   els.collectionTitle.textContent = info.title;
   els.collectionProgress.textContent = `Собрано ${s.got} из ${s.total}`;
   els.btnCollectionBack.classList.remove('hidden');
+  openPackKey = key;
   els.packsList.classList.add('hidden');
   els.packView.classList.remove('hidden');
   els.collectionGrid.innerHTML = '';
@@ -949,6 +974,193 @@ function simToTarget() {
   }
 }
 
+/* ---------------- обмен: подарочные коды ----------------
+
+   Подарок по коду, без сервера: все 72 карточки вшиты в cards.js на
+   каждом телефоне, передаётся только номер. Код = «пак-номер-слово»
+   (ЧУДИКИ-7-АИСТ): номер внутри пака + контрольное слово, чтобы
+   ошибка при диктовке/перепечатке не дарила чужую карточку.
+   Подарил — карточка ушла (collection -1, вплоть до нуля): пак с
+   дыркой снова начинает выпадать, «заработай заново». */
+
+const GIFT_WORD = {
+  gorod: { word: 'ЧУДИКИ', also: ['ГОРОД'] },
+  lisa:  { word: 'ОСЕНЬ',  also: ['ЛИСА', 'ЛИСИЧКА'] },
+  zima:  { word: 'ЗИМА',   also: ['ЗИМНИЙ'] },
+  kot:   { word: 'КОТ',    also: ['КОШКА', 'КОТИК'] }
+};
+const GIFT_CHECK = ['АИСТ', 'БОБР', 'ВОЛК', 'ГНОМ', 'ДЫНЯ', 'ЕРШ'];
+
+const giftPackCards = key => CARDS.filter(c => (c.pack || 'gorod') === key);
+
+/** Код карточки: пак-номер-контрольное слово. */
+function encodeGiftCode(card) {
+  const key = card.pack || 'gorod';
+  const n = giftPackCards(key).indexOf(card) + 1;
+  return GIFT_WORD[key].word + '-' + n + '-' + GIFT_CHECK[(CARDS.indexOf(card) + n) % 6];
+}
+
+/** Разбор кода: латинские двойники -> кириллица, номера и слова по отдельности. */
+function decodeGiftCode(raw) {
+  let s = String(raw || '').toUpperCase();
+  const lat = { A: 'А', B: 'В', C: 'С', E: 'Е', H: 'Н', K: 'К', M: 'М',
+                O: 'О', P: 'Р', T: 'Т', X: 'Х' };
+  s = s.replace(/[ABCEHKMOPTX]/g, ch => lat[ch]);
+  const words = [], nums = [];
+  (s.match(/[А-ЯЁ]+|\d+/g) || []).forEach(t => {
+    if (/^\d+$/.test(t)) nums.push(parseInt(t, 10)); else words.push(t);
+  });
+  if (!words.length || !nums.length)
+    return { error: 'Не похоже на код. Спроси у друга ещё раз.' };
+  if (words.length < 2)
+    return { error: 'Добавь контрольное слово в конце — например: ЧУДИКИ-7-АИСТ.' };
+  const key = Object.keys(GIFT_WORD).find(k =>
+    GIFT_WORD[k].word === words[0] || GIFT_WORD[k].also.includes(words[0]));
+  if (!key)
+    return { error: 'Не знаю коллекцию «' + words[0] + '». Проверь первое слово.' };
+  const n = nums[0];
+  const inPack = giftPackCards(key);
+  if (n < 1 || n > inPack.length)
+    return { error: 'Такого номера нет в коллекции. Проверь код.' };
+  const card = inPack[n - 1];
+  const check = GIFT_CHECK[(CARDS.indexOf(card) + n) % 6];
+  if (words[1] !== check)
+    return { error: 'Код не сходится — проверь номер и слово.' };
+  return { card };
+}
+
+let giftCard = null;   // карточка, чей код уже показан (она уже ушла)
+
+function showGiftView(v) {
+  els.giftConfirmView.classList.toggle('hidden', v !== 'confirm');
+  els.giftCodeView.classList.toggle('hidden', v !== 'code');
+  els.giftInputView.classList.toggle('hidden', v !== 'input');
+  els.giftOverlay.classList.remove('hidden');
+}
+
+function openGiftConfirm(card) {
+  giftCard = null;
+  const n = state.collection[card.id] || 0;
+  els.giftCardname.textContent = '«' + card.name + '»';
+  els.giftWarn.classList.toggle('hidden', n > 1);
+  showGiftView('confirm');
+}
+
+/** Подарил = расстался: счётчик -1, при нуле карточка уходит и из галереи. */
+function doGift(card) {
+  const n = state.collection[card.id] || 0;
+  if (n <= 1) {
+    delete state.collection[card.id];
+    state.order = (state.order || []).filter(id => id !== card.id);
+  } else {
+    state.collection[card.id] = n - 1;
+  }
+  save();
+  giftCard = card;
+  els.giftCodeName.textContent = '«' + card.name + '»';
+  els.giftCode.textContent = encodeGiftCode(card);
+  showGiftView('code');
+  try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+}
+
+/** Закрыть обмен. Если код был выдан — вернуть юзера в обновлённую галерею. */
+function closeGift() {
+  els.giftOverlay.classList.add('hidden');
+  if (!giftCard) return;
+  giftCard = null;
+  els.cardOverlay.classList.add('hidden');
+  currentCard = null;
+  cardFromGallery = false;
+  els.collection.classList.remove('hidden');
+  if (openPackKey) openPack(openPackKey); else renderCollection();
+  renderStats();
+}
+
+function copyGiftCode() {
+  const code = els.giftCode.textContent;
+  const done = () => {
+    els.btnGiftCopy.textContent = 'Скопировано ✓';
+    setTimeout(() => { els.btnGiftCopy.textContent = 'Скопировать код'; }, 1600);
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    ta.remove();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(code).then(done).catch(fallback);
+  else fallback();
+}
+
+function giftShare() {
+  const code = els.giftCode.textContent;
+  if (navigator.share) {
+    navigator.share({
+      title: 'Гуляю-собираю — подарок!',
+      text: 'Дарю тебе карточку! Введи код: ' + code
+    }).catch(() => {});
+  } else {
+    copyGiftCode();
+  }
+}
+
+/* приём: разобрать код, отметить как принятый, выдать карточку */
+function acceptGiftDraft() {
+  const res = decodeGiftCode(els.giftInput.value);
+  const msg = els.giftMsg;
+  msg.className = 'gift-msg';
+  if (res.error) {
+    msg.textContent = res.error;
+    msg.classList.add('err');
+    return;
+  }
+  const canonical = encodeGiftCode(res.card);
+  if (state.giftsAccepted.includes(canonical)) {
+    msg.textContent = 'Такой подарок уже принимали на этом телефоне.';
+    msg.classList.add('err');
+    return;
+  }
+  const wasComplete = CARDS.every(c => (state.collection[c.id] || 0) > 0);
+  state.collection[res.card.id] = (state.collection[res.card.id] || 0) + 1;
+  state.order = (state.order || []).filter(id => id !== res.card.id);
+  state.order.push(res.card.id);
+  state.giftsAccepted.push(canonical);
+  save();
+  renderStats();
+  els.giftOverlay.classList.add('hidden');
+  els.giftInput.value = '';
+  msg.textContent = '';
+  try { if (navigator.vibrate) navigator.vibrate([90, 80, 90]); } catch (e) {}
+  showCard(res.card, false);
+  if (!wasComplete && CARDS.every(c => (state.collection[c.id] || 0) > 0)) {
+    pendingComplete = true;
+  }
+}
+
+/* ---------------- заставка ---------------- */
+
+function initSplash() {
+  const s = $('splash');
+  if (!s) return;
+  const debug = location.search.includes('debug') || localStorage.getItem('wc_debug') === '1';
+  if (debug) { s.remove(); return; }
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let faded = false;
+  const skip = () => {
+    if (faded) return;
+    faded = true;
+    s.classList.add('splash-done');
+    setTimeout(() => { if (s.parentNode) s.remove(); }, 520);
+  };
+  s.addEventListener('click', skip);
+  setTimeout(skip, reduce ? 400 : 2450);
+  // страховка: даже если что-то пошло не так, заставка исчезнет
+  setTimeout(() => { if (s.parentNode) s.remove(); }, 3400);
+}
+
 /* ---------------- запуск ---------------- */
 
 function bindUi() {
@@ -1015,6 +1227,26 @@ function bindUi() {
   els.btnCollectionClose.addEventListener('click', () => els.collection.classList.add('hidden'));
   els.btnCompleteOk.addEventListener('click', () => els.completeOverlay.classList.add('hidden'));
 
+  // обмен
+  els.btnGift.addEventListener('click', () => {
+    els.giftInput.value = '';
+    els.giftMsg.className = 'gift-msg';
+    els.giftMsg.textContent = '';
+    showGiftView('input');
+  });
+  els.btnGiftAccept.addEventListener('click', acceptGiftDraft);
+  els.giftInput.addEventListener('keydown', e => { if (e.key === 'Enter') acceptGiftDraft(); });
+  els.btnGiftCancel.addEventListener('click', closeGift);
+  els.btnCardGift.addEventListener('click', () => { if (currentCard) openGiftConfirm(currentCard); });
+  els.btnGiftYes.addEventListener('click', () => { if (currentCard) doGift(currentCard); });
+  els.btnGiftNo.addEventListener('click', closeGift);
+  els.btnGiftCopy.addEventListener('click', copyGiftCode);
+  els.btnGiftShare.addEventListener('click', giftShare);
+  els.btnGiftDone.addEventListener('click', closeGift);
+  // «Поделиться» показываем, только если браузер умеет нативный шаринг
+  if (!navigator.share) els.btnGiftShare.classList.add('hidden');
+  else els.btnGiftShare.classList.remove('hidden');
+
   els.btnSim350.addEventListener('click', () => {
     const a = state.active;
     if (a && a.mode === 'circle') {
@@ -1031,10 +1263,18 @@ function bindUi() {
 
 function init() {
   load();
+  initSplash();
   initMap();
   bindUi();
   updateModeButtons();
   renderStats();
+
+  // подарок пришёл ссылкой (?gift=ЧУДИКИ-7-АИСТ) — открываем ввод кода
+  const giftParam = new URLSearchParams(location.search).get('gift');
+  if (giftParam) {
+    els.giftInput.value = giftParam;
+    showGiftView('input');
+  }
 
   // восстановить незавершённую прогулку
   if (state.active) {

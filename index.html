@@ -10,9 +10,36 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css?v=22">
+<link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
+
+<!-- заставка: следы «идут» по экрану, дошли — карточки появились -->
+<div id="splash">
+  <div class="splash-title">
+    <h2>Гуляю-собираю</h2>
+    <small>Карточки за прогулки</small>
+  </div>
+  <div class="splash-fan">
+    <div class="splash-card card-back" data-pack="gorod">
+      <div class="card-back-inner"><div class="card-back-mark"></div></div>
+    </div>
+    <div class="splash-card card-back" data-pack="lisa">
+      <div class="card-back-inner"><div class="card-back-mark"></div></div>
+    </div>
+    <div class="splash-card card-back" data-pack="kot">
+      <div class="card-back-inner"><div class="card-back-mark"></div></div>
+    </div>
+  </div>
+  <div class="splash-steps" aria-hidden="true">
+    <span style="left:12%; bottom:9%;  --r:-38deg">👣</span>
+    <span style="left:22%; bottom:15%; --r:22deg">👣</span>
+    <span style="left:31%; bottom:23%; --r:-34deg">👣</span>
+    <span style="left:40%; bottom:32%; --r:26deg">👣</span>
+    <span style="left:47%; bottom:42%; --r:-30deg">👣</span>
+    <span style="left:53%; bottom:53%; --r:20deg">👣</span>
+  </div>
+</div>
 
 <div id="map"></div>
 
@@ -21,6 +48,7 @@
   <div class="stat"><span id="stat-cards">0</span><small>карточек</small></div>
   <div class="stat"><span id="stat-walks">0</span><small>прогулок</small></div>
   <button id="btn-collection" class="icon-btn" title="Коллекция">▦</button>
+  <button id="btn-gift" class="icon-btn" title="Подарок от друга">🎁</button>
 </header>
 
 <!-- индикатор статуса прогулки -->
@@ -86,6 +114,7 @@
   </div>
   <p class="tap-hint" id="card-hint">Нажми на карточку — она перевернётся</p>
   <button id="btn-card-ok" class="primary-btn">Забрать</button>
+  <button id="btn-card-gift" class="ghost-btn card-gift-btn hidden">Подарить другу 🎁</button>
 </div>
 
 <!-- оверлей награды: до трёх карточек рубашкой вверх, открываются тапом -->
@@ -120,6 +149,38 @@
   </div>
 </div>
 
+<!-- обмен: подарочный код — подтверждение, выдача кода, ввод кода -->
+<div id="gift-overlay" class="overlay hidden">
+  <div id="gift-confirm-view" class="gift-view">
+    <h2>Подарить карточку?</h2>
+    <p class="gift-cardname" id="gift-cardname"></p>
+    <p class="gift-warn hidden" id="gift-warn">Это твоя единственная — она уйдёт безвозвратно.
+      Найти снова сможешь только на прогулке!</p>
+    <button id="btn-gift-yes" class="primary-btn">Подарить 🎁</button>
+    <button id="btn-gift-no" class="ghost-btn">Отмена</button>
+  </div>
+
+  <div id="gift-code-view" class="gift-view hidden">
+    <h2>Код подарка</h2>
+    <p class="gift-cardname" id="gift-code-name"></p>
+    <div class="gift-code" id="gift-code"></div>
+    <p class="muted">Продиктуй код другу или отправь сообщением — друг введёт его через 🎁 наверху экрана.</p>
+    <button id="btn-gift-copy" class="primary-btn">Скопировать код</button>
+    <button id="btn-gift-share" class="ghost-btn hidden">Поделиться…</button>
+    <button id="btn-gift-done" class="ghost-btn">Готово</button>
+  </div>
+
+  <div id="gift-input-view" class="gift-view hidden">
+    <h2>Подарок от друга</h2>
+    <p class="muted">Друг дарит тебе карточку — введи подарочный код.</p>
+    <input id="gift-input" type="text" autocapitalize="characters" autocomplete="off"
+           placeholder="ЧУДИКИ-7-АИСТ">
+    <p class="gift-msg" id="gift-msg"></p>
+    <button id="btn-gift-accept" class="primary-btn">Получить</button>
+    <button id="btn-gift-cancel" class="ghost-btn">Позже</button>
+  </div>
+</div>
+
 <!-- отладка -->
 <div id="debug" class="hidden">
   <button id="btn-sim-350">пройти 350 м</button>
@@ -128,6 +189,6 @@
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="cards.js?v=19"></script>
-<script src="app.js?v=25"></script>
+<script src="app.js?v=26"></script>
 </body>
 </html>
