@@ -17,7 +17,8 @@ const CFG = {
     { from: 30, limit: 5 }
     // анлим — в будущем за купленный пак (снимать лимит через флаг в save)
   ],
-  ZOOM: 16,
+  ZOOM: 15.8,             // стартовый масштаб: круг 250 м чуть меньше экрана
+  ZOOM_SNAP: 0,           // разрешаем дробный зум (иначе 15.8 округлится до 16)
   DEFAULT_CENTER: [56.3269, 44.0059] // Нижний Новгород
 };
 
@@ -197,7 +198,8 @@ let watchId = null;
 function initMap() {
   map = L.map('map', {
     zoomControl: false,
-    attributionControl: true
+    attributionControl: true,
+    zoomSnap: CFG.ZOOM_SNAP
   }).setView(CFG.DEFAULT_CENTER, CFG.ZOOM);
 
   // стандартные бесплатные плитки OSM; тёмную «ночную» раскраску даёт CSS-фильтр
@@ -603,7 +605,7 @@ function drawActive() {
     fillColor: '#7c5cff', fillOpacity: 0.05, className: 'home-ring'
   }).addTo(layerGroup);
 
-  map.setView([a.start.lat, a.start.lng], 15);
+  map.setView([a.start.lat, a.start.lng], CFG.ZOOM);
 }
 
 /* ---------------- обработка позиции ---------------- */

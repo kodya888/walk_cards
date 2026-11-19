@@ -66,6 +66,16 @@ html, body {
 }
 #collection .icon-btn { margin-left: 0; }
 
+/* правый-верхний угол: крупная «Коллекция», под ней «Подарок» */
+.corner-btns {
+  margin-left: auto;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.corner-btns .icon-btn { margin-left: 0; }
+.icon-btn.big {
+  width: 56px; height: 56px; font-size: 28px; border-radius: 14px;
+}
+
 /* ===== HUD прогулки ===== */
 #hud {
   position: fixed; left: 12px; right: 12px; bottom: calc(16px + var(--safe-b));
@@ -521,7 +531,7 @@ html, body {
 
 /* ===== отладка ===== */
 #debug {
-  position: fixed; right: 10px; top: calc(64px + var(--safe-t)); z-index: 700;
+  position: fixed; left: 10px; top: calc(64px + var(--safe-t)); z-index: 700;
   display: flex; flex-direction: column; gap: 6px;
 }
 #debug button {

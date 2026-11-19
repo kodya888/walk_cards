@@ -10,7 +10,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
@@ -43,12 +43,14 @@
 
 <div id="map"></div>
 
-<!-- верхняя панель -->
+<!-- верхняя панель: счетчики слева, справа столбик — коллекция (крупнее) и под ней подарок -->
 <header id="topbar">
   <div class="stat"><span id="stat-cards">0</span><small>карточек</small></div>
   <div class="stat"><span id="stat-walks">0</span><small>прогулок</small></div>
-  <button id="btn-collection" class="icon-btn" title="Коллекция">▦</button>
-  <button id="btn-gift" class="icon-btn" title="Подарок от друга">🎁</button>
+  <div class="corner-btns">
+    <button id="btn-collection" class="icon-btn big" title="Коллекция">▦</button>
+    <button id="btn-gift" class="icon-btn" title="Подарок от друга">🎁</button>
+  </div>
 </header>
 
 <!-- индикатор статуса прогулки -->
@@ -158,6 +160,6 @@
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="cards.js?v=19"></script>
-<script src="app.js?v=27"></script>
+<script src="app.js?v=28"></script>
 </body>
 </html>
