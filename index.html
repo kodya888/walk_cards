@@ -10,7 +10,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
 
@@ -56,43 +56,13 @@
   <div id="hud-text">Ищем тебя на карте…</div>
   <div id="hud-distance"></div>
   <div class="hud-row">
-    <button id="btn-navigate" class="hud-btn hidden">Как дойти ↗</button>
     <button id="btn-cancel" class="hud-btn danger">Закончить</button>
   </div>
 </div>
 
-<!-- нижняя панель: старт -->
-<div id="start-sheet" class="sheet hidden">
-  <h2>Куда пойдём?</h2>
-  <p class="muted" id="mode-hint">Выбери режим поиска</p>
-
-  <div class="modes" id="modes">
-    <button class="mode-card" data-mode="circle">
-      <b>Выйти за круг</b>
-      <small>Просто уйди на 300 м от дома</small>
-    </button>
-    <button class="mode-card" data-mode="point">
-      <b>Найти точку</b>
-      <small>Поставь цель и дойди до неё</small>
-    </button>
-    <button class="mode-card locked" data-mode="route">
-      <b>Маршрут</b>
-      <small>2 точки подряд</small>
-      <span class="lock">🔒</span>
-    </button>
-  </div>
-
-  <div id="point-tools" class="hidden">
-    <p class="muted">Отодвинь точку пальцем: дальше — реже, но ценнее.</p>
-    <button id="btn-reroll" class="ghost-btn">Другое место</button>
-  </div>
-
-  <button id="btn-start" class="primary-btn">Начать квест</button>
-  <button id="btn-close-sheet" class="ghost-btn">Отмена</button>
-</div>
-
-<!-- кнопка запуска -->
-<button id="btn-open-sheet" class="fab">Начать квест</button>
+<!-- главный экран: круг вокруг тебя, кнопка «Вперед» запускает квест -->
+<div id="go-hint">Выйди за круг</div>
+<button id="btn-go" class="fab">Вперед</button>
 
 <!-- оверлей карточки -->
 <div id="card-overlay" class="overlay hidden">
@@ -184,11 +154,10 @@
 <!-- отладка -->
 <div id="debug" class="hidden">
   <button id="btn-sim-350">пройти 350 м</button>
-  <button id="btn-sim-to-target">к цели</button>
 </div>
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="cards.js?v=19"></script>
-<script src="app.js?v=26"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>

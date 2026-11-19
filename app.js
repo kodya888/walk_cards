@@ -5,15 +5,10 @@
    ========================================================= */
 
 const CFG = {
-  CIRCLE_R: 300,          // радиус «домашнего» круга, м
-  POINT_MIN: 300,         // ближе этой дистанции точку ставить нельзя
-  POINT_MAX: 700,         // дальше этой — тоже
-  HIT_R: 80,              // зона, в которой точка считается найденной
+  CIRCLE_R: 250,          // радиус круга квеста «выйди за круг», м
   ACC_MAX: 60,            // замеры с точностью хуже 60 м не засчитываем
   CONFIRM: 2,             // сколько замеров подряд нужно для срабатывания
   TICK_MS: 4000,          // как часто обрабатывать позицию
-  ROUTE_LEN: 2,           // точек в маршруте на текущем уровне
-  ROUTE_UNLOCK_WALKS: 3,  // после скольких прогулок открывается маршрут
   LIMITS_ENABLED: false,  // дневной лимит выключен (для теста; вернуть, когда появится монетизация)
   LIMIT_TIERS: [          // дневной лимит карточек по «прокачке» (всего прогулок)
     { from: 0,  limit: 2 },
@@ -37,9 +32,7 @@ let state = {
   walks: 0,
   walksToday: 0,                  // карточек за сегодня
   day: '',                        // 'ГГГГ-ММ-ДД' — сброс дневного счётчика
-  active: null,                   // текущая прогулка
-  home: null,                     // {lat,lng} — старт последней прогулки
-  unlocked: { circle: true, point: true, route: false }
+  active: null                    // текущая прогулка
 };
 
 function save() {
@@ -54,7 +47,6 @@ function load() {
       state = Object.assign(state, data);
     }
   } catch (e) {}
-  state.unlocked.route = state.walks >= CFG.ROUTE_UNLOCK_WALKS;
   if (!Array.isArray(state.giftsAccepted)) state.giftsAccepted = [];
   if (!Array.isArray(state.order)) {          // переход со старой версии
     state.order = CARDS.filter(c => state.collection[c.id] > 0).map(c => c.id);
@@ -110,13 +102,6 @@ function haversine(a, b) {
   return 2 * R_EARTH * Math.asin(Math.sqrt(s));
 }
 
-function bearing(a, b) {
-  const y = Math.sin(rad(b.lng - a.lng)) * Math.cos(rad(b.lat));
-  const x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) -
-            Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(b.lng - a.lng));
-  return (deg(Math.atan2(y, x)) + 360) % 360;
-}
-
 /** точка на расстоянии dist (м) по азимуту brg (0–360) от точки a */
 function destination(a, dist, brg) {
   const dr = dist / R_EARTH, b = rad(brg);
@@ -126,11 +111,6 @@ function destination(a, dist, brg) {
   const lng2 = lng1 + Math.atan2(Math.sin(b) * Math.sin(dr) * Math.cos(lat1),
                                  Math.cos(dr) - Math.sin(lat1) * Math.sin(lat2));
   return { lat: deg(lat2), lng: ((deg(lng2) + 540) % 360) - 180 };
-}
-
-function randomTarget(from) {
-  const d = CFG.POINT_MIN + Math.random() * (CFG.POINT_MAX - CFG.POINT_MIN);
-  return destination(from, d, Math.random() * 360);
 }
 
 function fmtDist(m) {
@@ -149,16 +129,9 @@ const els = {
   hud: $('hud'),
   hudText: $('hud-text'),
   hudDist: $('hud-distance'),
-  btnNavigate: $('btn-navigate'),
   btnCancel: $('btn-cancel'),
-  startSheet: $('start-sheet'),
-  modeHint: $('mode-hint'),
-  modes: $('modes'),
-  pointTools: $('point-tools'),
-  btnReroll: $('btn-reroll'),
-  btnStart: $('btn-start'),
-  btnCloseSheet: $('btn-close-sheet'),
-  btnOpenSheet: $('btn-open-sheet'),
+  btnGo: $('btn-go'),
+  goHint: $('go-hint'),
   cardOverlay: $('card-overlay'),
   cardShell: $('card-shell'),
   cardInner: $('card-inner'),
@@ -205,18 +178,15 @@ const els = {
   btnGiftAccept: $('btn-gift-accept'),
   btnGiftCancel: $('btn-gift-cancel'),
   debug: $('debug'),
-  btnSim350: $('btn-sim-350'),
-  btnSimTarget: $('btn-sim-to-target')
+  btnSim350: $('btn-sim-350')
 };
 
 /* ---------------- карта ---------------- */
 
 let map = null;
 let meMarker = null;
-let layerGroup = null;      // всё, что относится к текущей прогулке
-let homeLayer = null;       // «призрак» дома на карте (куда вернуться)
-let draft = null;           // черновик точки до старта
-let chosenMode = 'circle';
+let layerGroup = null;      // всё, что относится к активной прогулке
+let homeLayer = null;       // «спокойный» круг главного экрана
 let openPackKey = null;     // какой пак открыт в галерее (null — список паков)
 
 let me = null;              // {lat,lng,acc}
@@ -276,7 +246,11 @@ function onPosition(pos) {
   const c = pos.coords;
   me = { lat: c.latitude, lng: c.longitude, acc: c.accuracy };
   updateMeMarker();
-  if (!state.active) map.panTo([me.lat, me.lng], { animate: true, duration: 0.6 });
+  if (!state.active) {
+    // квест не идёт — круг «наводится» на тебя, карта следует
+    map.panTo([me.lat, me.lng], { animate: true, duration: 0.6 });
+    drawIdleCircle();
+  }
   tick(true);
 }
 
@@ -565,128 +539,47 @@ function renderStats() {
   els.statWalks.textContent = state.walks;
 }
 
-/* ---------------- режимы / старт ---------------- */
+/* ---------------- старт / главный экран ---------------- */
 
-function selectMode(mode) {
-  chosenMode = mode;
-  els.startSheet.classList.add('compact');
-  [...els.modes.children].forEach(b => b.classList.toggle('selected', b.dataset.mode === mode));
-  const routeBtn = els.modes.querySelector('[data-mode="route"]');
-  if (routeBtn) routeBtn.classList.toggle('locked', !state.unlocked.route);
-
-  if (mode === 'point') {
-    els.pointTools.classList.remove('hidden');
-    els.modeHint.textContent = 'Отодвинь точку и выбери направление';
-    makeDraftPoint();
-  } else {
-    els.pointTools.classList.add('hidden');
-    clearDraft();
-    els.modeHint.textContent = mode === 'circle'
-      ? 'Выйди за круг — и карточка твоя'
-      : 'Две точки подряд, редкая карточка в конце';
-  }
+/* «Спокойный» круг главного экрана: рисуется вокруг тебя до старта.
+   Пока квест не начат — центрируется по GPS; после «Вперед» круг
+   замирает на месте, двигается только точка. */
+function drawIdleCircle() {
+  if (!me || state.active) return;
+  homeLayer.clearLayers();
+  L.circle([me.lat, me.lng], {
+    radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2,
+    fillColor: '#7c5cff', fillOpacity: 0.05, className: 'home-ring'
+  }).addTo(homeLayer);
 }
 
-function makeDraftPoint() {
-  clearDraft();
-  if (!me) return;
-  const t = randomTarget(me);
-  draft = t;
-
-  const line = L.polyline([[me.lat, me.lng], [t.lat, t.lng]], {
-    color: '#ffb020', weight: 2, dashArray: '6 8', opacity: 0.85
-  }).addTo(layerGroup);
-
-  const circle = L.circle([me.lat, me.lng], {
-    radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2, fillColor: '#7c5cff', fillOpacity: 0.06,
-    className: 'home-ring'
-  }).addTo(layerGroup);
-
-  const marker = L.marker([t.lat, t.lng], {
-    draggable: true,
-    icon: L.divIcon({ className: 'target-icon', html: '<div class="target-pin">★</div>', iconSize: [34, 34], iconAnchor: [17, 17] }),
-    zIndexOffset: 900
-  }).addTo(layerGroup);
-
-  draft = { lat: t.lat, lng: t.lng, marker, line, circle };
-
-  marker.on('drag', () => {
-    const p = marker.getLatLng();
-    line.setLatLngs([[me.lat, me.lng], [p.lat, p.lng]]);
-    els.modeHint.textContent = 'Расстояние: ' + fmtDist(haversine(me, p));
-  });
-
-  marker.on('dragend', () => {
-    let p = marker.getLatLng();
-    const d = haversine(me, p);
-    const brg = bearing(me, p);
-    let fixed = p;
-    if (d < CFG.POINT_MIN) fixed = destination(me, CFG.POINT_MIN, brg);
-    if (d > CFG.POINT_MAX) fixed = destination(me, CFG.POINT_MAX, brg);
-    marker.setLatLng([fixed.lat, fixed.lng]);
-    line.setLatLngs([[me.lat, me.lng], [fixed.lat, fixed.lng]]);
-    draft.lat = fixed.lat;
-    draft.lng = fixed.lng;
-    els.modeHint.textContent = 'Расстояние: ' + fmtDist(haversine(me, draft))
-      + (haversine(me, draft) > 550 ? ' — шанс редкой выше' : '');
-  });
-
-  els.modeHint.textContent = 'Расстояние: ' + fmtDist(haversine(me, t));
-
-  // вписываем обе точки так, чтобы они не прятались под панелью
-  const sheetH = els.startSheet.getBoundingClientRect().height || 260;
-  const pad = Math.max(30, sheetH + 40);
-  map.fitBounds(L.latLngBounds([[me.lat, me.lng], [t.lat, t.lng]]), {
-    paddingTopLeft: [40, 80],
-    paddingBottomRight: [40, pad],
-    animate: false
-  });
-  els.btnStart.textContent = 'В путь';
-}
-
-function clearDraft() {
-  if (draft && draft.marker) layerGroup.clearLayers();
-  draft = null;
+/** Вернуть главный экран: круг вокруг тебя + кнопка «Вперед». */
+function showMainScreen() {
+  layerGroup.clearLayers();
+  els.hud.classList.add('hidden');
+  els.btnGo.classList.remove('hidden');
+  els.goHint.classList.remove('hidden');
+  els.goHint.textContent = 'Выйди за круг';
+  drawIdleCircle();
 }
 
 function startWalk() {
   if (!me) {
-    els.modeHint.textContent = 'Жду координаты GPS… включи геолокацию.';
+    els.goHint.textContent = 'Жду координаты GPS… включи геолокацию.';
     return;
   }
-  if (chosenMode === 'route' && !state.unlocked.route) return;
 
   rollDay();
   if (cardsLeftToday() <= 0) {
-    els.modeHint.textContent =
+    els.goHint.textContent =
       'Дневной лимит карточек исчерпан — новая карточка завтра. ' +
       'Гуляешь дальше ради удовольствия? Прогулка без награды: «Закончить» сейчас.';
     return;
   }
 
-  let active;
-  if (chosenMode === 'circle') {
-    active = { mode: 'circle', start: { lat: me.lat, lng: me.lng }, target: null, streak: 0 };
-  } else if (chosenMode === 'point') {
-    const t = draft ? { lat: draft.lat, lng: draft.lng } : randomTarget(me);
-    active = { mode: 'point', start: { lat: me.lat, lng: me.lng }, target: t, streak: 0 };
-  } else {
-    const pts = [];
-    let prev = { lat: me.lat, lng: me.lng };
-    for (let i = 0; i < CFG.ROUTE_LEN; i++) {
-      const p = destination(prev, CFG.CIRCLE_R + Math.random() * 200, Math.random() * 360);
-      pts.push(p);
-      prev = p;
-    }
-    active = { mode: 'route', start: { lat: me.lat, lng: me.lng }, route: pts, index: 0, streak: 0 };
-  }
-
-  state.active = active;
-  state.home = { lat: me.lat, lng: me.lng };
+  state.active = { mode: 'circle', start: { lat: me.lat, lng: me.lng }, streak: 0 };
   save();
-  clearDraft();
   homeLayer.clearLayers();
-  els.startSheet.classList.add('hidden');
   drawActive();
   tick(true);
 }
@@ -697,70 +590,20 @@ function drawActive() {
   layerGroup.clearLayers();
   const a = state.active;
   if (!a) return;
-  const from = me || a.start;
 
-  els.btnOpenSheet.classList.add('hidden');
+  els.btnGo.classList.add('hidden');
+  els.goHint.classList.add('hidden');
   els.hud.classList.remove('hidden');
   els.hudDist.textContent = '';
+  els.hudText.textContent = 'Выйди за круг';
 
-  // стартовая точка
+  // круг замирает на месте старта (точка GPS идёт дальше)
   L.circle([a.start.lat, a.start.lng], {
     radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2,
     fillColor: '#7c5cff', fillOpacity: 0.05, className: 'home-ring'
   }).addTo(layerGroup);
 
-  if (a.mode === 'circle') {
-    els.hudText.textContent = 'Выйди за круг';
-    map.setView([a.start.lat, a.start.lng], 15);
-  }
-
-  if (a.mode === 'point') {
-    els.hudText.textContent = 'Иди к точке';
-    L.polyline([[from.lat, from.lng], [a.target.lat, a.target.lng]], {
-      color: '#ffb020', weight: 2, dashArray: '6 8', opacity: 0.8
-    }).addTo(layerGroup);
-    L.marker([a.target.lat, a.target.lng], {
-      icon: L.divIcon({ className: 'target-icon', html: '<div class="target-pin">★</div>', iconSize: [34, 34], iconAnchor: [17, 17] })
-    }).addTo(layerGroup);
-    L.circle([a.target.lat, a.target.lng], {
-      radius: CFG.HIT_R, color: '#ffb020', weight: 1.5,
-      fillColor: '#ffb020', fillOpacity: 0.12
-    }).addTo(layerGroup);
-    map.setView([a.target.lat, a.target.lng], 15);
-  }
-
-  if (a.mode === 'route') {
-    a.route.forEach((p, i) => {
-      const activePt = i === a.index;
-      L.marker([p.lat, p.lng], {
-        icon: L.divIcon({
-          className: 'target-icon',
-          html: `<div class="target-pin ${activePt ? '' : 'done'}">${i + 1}</div>`,
-          iconSize: [34, 34], iconAnchor: [17, 17]
-        })
-      }).addTo(layerGroup);
-      L.circle([p.lat, p.lng], {
-        radius: CFG.HIT_R, color: activePt ? '#ffb020' : '#48d18a',
-        weight: 1.5, fillColor: activePt ? '#ffb020' : '#48d18a', fillOpacity: 0.12
-      }).addTo(layerGroup);
-    });
-    const cur = a.route[a.index];
-    if (cur) L.polyline([[from.lat, from.lng], [cur.lat, cur.lng]], {
-      color: '#ffb020', weight: 2, dashArray: '6 8', opacity: 0.8
-    }).addTo(layerGroup);
-    els.hudText.textContent = `Точка ${a.index + 1} из ${a.route.length}`;
-    if (cur) map.setView([cur.lat, cur.lng], 15);
-  }
-
-  const goal = currentGoal(a);
-  els.btnNavigate.classList.toggle('hidden', !goal);
-}
-
-function currentGoal(a) {
-  if (!a) return null;
-  if (a.mode === 'circle') return null;
-  if (a.mode === 'point') return a.target;
-  return a.route[a.index] || null;
+  map.setView([a.start.lat, a.start.lng], 15);
 }
 
 /* ---------------- обработка позиции ---------------- */
@@ -772,23 +615,9 @@ function tick(force) {
   lastTick = now;
 
   const a = state.active;
-  let ok = false;
-  let dist = 0;
-
-  if (a.mode === 'circle') {
-    dist = haversine(me, a.start);
-    ok = dist > CFG.CIRCLE_R + 15;
-    els.hudDist.textContent = fmtDist(dist) + ' от дома';
-  } else if (a.mode === 'point') {
-    dist = haversine(me, a.target);
-    ok = dist < CFG.HIT_R;
-    els.hudDist.textContent = fmtDist(dist) + ' до точки';
-  } else {
-    const t = a.route[a.index];
-    dist = haversine(me, t);
-    ok = dist < CFG.HIT_R;
-    els.hudDist.textContent = fmtDist(dist) + ' до точки ' + (a.index + 1);
-  }
+  const dist = haversine(me, a.start);
+  const ok = dist > CFG.CIRCLE_R + 15;
+  els.hudDist.textContent = fmtDist(dist) + ' от центра';
 
   if (me.acc != null && me.acc > CFG.ACC_MAX) {
     els.hudDist.textContent += ' · GPS неточный';
@@ -811,38 +640,17 @@ function success() {
   if (!a) return;
 
   /* вибрация события (Android Chrome; iOS Safari не поддерживает — молча пропускаем).
-     Выход за круг — двойной «тук-тук», вход в точку — три коротких. */
+     Выход за круг — двойной «тук-тук». */
   try {
-    if (navigator.vibrate) {
-      navigator.vibrate(a.mode === 'circle' ? [110, 100, 110] : [90, 80, 90, 80, 90]);
-    }
+    if (navigator.vibrate) navigator.vibrate([110, 100, 110]);
   } catch (e) { /* вибрация недоступна — не важно */ }
-
-  if (a.mode === 'route' && a.index < a.route.length - 1) {
-    a.index++;
-    a.streak = 0;
-    save();
-    drawActive();
-    els.hudText.textContent = `Точка ${a.index} пройдена! Дальше к ${a.index + 1}`;
-    return;
-  }
 
   finishWalk();
 }
 
 function finishWalk() {
   const a = state.active;
-  let frac = 0;
-  let mode = a.mode;
-
-  if (mode === 'circle') {
-    frac = Math.min(1, Math.max(0, (haversine(me, a.start) - CFG.CIRCLE_R) / CFG.CIRCLE_R));
-  } else if (mode === 'point') {
-    const d = haversine(a.start, a.target);
-    frac = Math.min(1, Math.max(0, (d - CFG.POINT_MIN) / (CFG.POINT_MAX - CFG.POINT_MIN)));
-  } else {
-    frac = 1;
-  }
+  const frac = Math.min(1, Math.max(0, (haversine(me, a.start) - CFG.CIRCLE_R) / CFG.CIRCLE_R));
 
   rollDay();
 
@@ -850,17 +658,14 @@ function finishWalk() {
   if (cardsLeftToday() <= 0) {
     state.active = null;
     save();
-    layerGroup.clearLayers();
-    els.hud.classList.add('hidden');
-    els.btnOpenSheet.classList.remove('hidden');
-    openSheet();
-    els.modeHint.textContent =
+    showMainScreen();
+    els.goHint.textContent =
       'Дневной лимит карточек исчерпан — новая карточка завтра. До завтра!';
     return;
   }
 
   const wasComplete = CARDS.every(c => (state.collection[c.id] || 0) > 0);
-  const cards = pickRewards(mode, frac);   // до 3 карточек, по одной из пака
+  const cards = pickRewards('circle', frac);   // до 3 карточек, по одной из пака
   cards.forEach(card => {
     state.collection[card.id] = (state.collection[card.id] || 0) + 1;
     // последняя выпавшая карточка — всегда первая в галерее:
@@ -873,80 +678,12 @@ function finishWalk() {
   }
   state.walksToday = (state.walksToday || 0) + 1;
   state.walks += 1;
-  state.unlocked.route = state.walks >= CFG.ROUTE_UNLOCK_WALKS;
   state.active = null;
   save();
 
-  layerGroup.clearLayers();
-  els.hud.classList.add('hidden');
-  els.btnOpenSheet.classList.remove('hidden');
-
+  showMainScreen();
   renderStats();
   showRewards(cards);
-}
-
-/* ---------------- навигация ----------------
-
-   Открывает Яндекс.Карты с пешеходным маршрутом (rtt=pd).
-   Ключ API не нужен. */
-
-function openNavigation() {
-  const a = state.active;
-  const goal = currentGoal(a);
-  if (!goal) return;
-  const from = me || (a && a.start);
-  if (!from) return;
-  const url = `https://yandex.ru/maps/?rtext=${from.lat},${from.lng}~${goal.lat},${goal.lng}&rtt=pd`;
-  window.open(url, '_blank');
-}
-
-/* ---------------- интерфейс ---------------- */
-
-function openSheet() {
-  els.startSheet.classList.remove('hidden', 'compact');
-  els.btnOpenSheet.classList.add('hidden');
-  els.btnStart.textContent = 'Начать квест';
-  // сброс выбора
-  [...els.modes.children].forEach(b => b.classList.remove('selected'));
-  els.pointTools.classList.add('hidden');
-
-  // подсказка про дом, если ты далеко от него + сколько карточек осталось на сегодня
-  const away = state.home && me ? haversine(me, state.home) : 0;
-  const left = cardsLeftToday();
-  const lim = dailyLimit();
-  const limText = isFinite(lim)
-    ? `Сегодня: ${lim - left} из ${lim} карточек`
-    : `Сегодня: ${state.walksToday || 0} карточек`;
-  els.modeHint.textContent =
-    (away > CFG.CIRCLE_R ? `Ты в ${fmtDist(away)} от дома — выбери, каким путём вернёшься.` : '') +
-    ` ${limText}.` +
-    (!isFinite(lim) || left > 0 ? '' : ' Лимит исчерпан — новая карточка завтра.');
-
-  if (state.home) {
-    homeLayer.clearLayers();
-    L.circle([state.home.lat, state.home.lng], {
-      radius: CFG.CIRCLE_R, color: '#7c5cff', weight: 2, dashArray: '4 8',
-      fillColor: '#7c5cff', fillOpacity: 0.04, className: 'home-ghost'
-    }).addTo(homeLayer);
-  }
-  clearDraft();
-}
-
-function closeSheet() {
-  els.startSheet.classList.add('hidden');
-  els.btnOpenSheet.classList.remove('hidden');
-  clearDraft();
-}
-
-function updateModeButtons() {
-  const routeBtn = els.modes.querySelector('[data-mode="route"]');
-  if (!routeBtn) return;
-  routeBtn.classList.toggle('locked', !state.unlocked.route);
-  const lock = routeBtn.querySelector('.lock');
-  if (lock) lock.hidden = state.unlocked.route;
-  routeBtn.querySelector('small').textContent = state.unlocked.route
-    ? `${CFG.ROUTE_LEN} точки подряд, редкая в конце`
-    : `Откроется после ${CFG.ROUTE_UNLOCK_WALKS} прогулок`;
 }
 
 /* ---------------- симулятор ---------------- */
@@ -957,21 +694,9 @@ function shiftMe(distM, brg) {
   me = { lat: p.lat, lng: p.lng, acc: 5 };
   simulate = true;
   updateMeMarker();
+  drawIdleCircle();
   map.panTo([me.lat, me.lng], { animate: true, duration: 0.4 });
   tick(true);
-}
-
-function simToTarget() {
-  const goal = currentGoal(state.active);
-  if (goal) {
-    if (!me) me = { lat: CFG.DEFAULT_CENTER[0], lng: CFG.DEFAULT_CENTER[1], acc: 5 };
-    me = { lat: goal.lat, lng: goal.lng, acc: 5 };
-    simulate = true;
-    updateMeMarker();
-    tick(true);
-  } else {
-    shiftMe(350, Math.random() * 360);
-  }
 }
 
 /* ---------------- обмен: подарочные коды ----------------
@@ -1164,32 +889,14 @@ function initSplash() {
 /* ---------------- запуск ---------------- */
 
 function bindUi() {
-  els.btnOpenSheet.addEventListener('click', openSheet);
-  els.btnCloseSheet.addEventListener('click', closeSheet);
-
-  els.modes.addEventListener('click', e => {
-    const btn = e.target.closest('.mode-card');
-    if (!btn) return;
-    const mode = btn.dataset.mode;
-    if (mode === 'route' && !state.unlocked.route) {
-      els.modeHint.textContent = `Маршрут откроется после ${CFG.ROUTE_UNLOCK_WALKS} прогулок`;
-      return;
-    }
-    selectMode(mode);
-  });
-
-  els.btnStart.addEventListener('click', startWalk);
-  els.btnReroll.addEventListener('click', makeDraftPoint);
-  els.btnNavigate.addEventListener('click', openNavigation);
+  els.btnGo.addEventListener('click', startWalk);
 
   els.btnCancel.addEventListener('click', () => {
     if (!state.active) return;
     if (!confirm('Закончить прогулку без награды?')) return;
     state.active = null;
     save();
-    layerGroup.clearLayers();
-    els.hud.classList.add('hidden');
-    els.btnOpenSheet.classList.remove('hidden');
+    showMainScreen();
   });
 
   els.cardInner.addEventListener('click', () => els.cardInner.classList.toggle('flipped'));
@@ -1248,17 +955,8 @@ function bindUi() {
   else els.btnGiftShare.classList.remove('hidden');
 
   els.btnSim350.addEventListener('click', () => {
-    const a = state.active;
-    if (a && a.mode === 'circle') {
-      shiftMe(CFG.CIRCLE_R + 120, Math.random() * 360);
-    } else if (a) {
-      const goal = currentGoal(a);
-      shiftMe(haversine(me, goal) + 60, bearing(me, goal));
-    } else {
-      shiftMe(350, Math.random() * 360);
-    }
+    shiftMe(CFG.CIRCLE_R + 120, Math.random() * 360);
   });
-  els.btnSimTarget.addEventListener('click', simToTarget);
 }
 
 function init() {
@@ -1266,7 +964,6 @@ function init() {
   initSplash();
   initMap();
   bindUi();
-  updateModeButtons();
   renderStats();
 
   // подарок пришёл ссылкой (?gift=ЧУДИКИ-7-АИСТ) — открываем ввод кода
@@ -1279,7 +976,6 @@ function init() {
   // восстановить незавершённую прогулку
   if (state.active) {
     drawActive();
-    els.btnOpenSheet.classList.add('hidden');
   }
 
   // отладка
@@ -1288,6 +984,7 @@ function init() {
     els.debug.classList.remove('hidden');
     if (!me) me = { lat: CFG.DEFAULT_CENTER[0], lng: CFG.DEFAULT_CENTER[1], acc: 5 };
     updateMeMarker();
+    drawIdleCircle();
   }
 
   startGeo();
