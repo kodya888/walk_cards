@@ -10,7 +10,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
 
@@ -72,7 +72,7 @@
     <div class="card-inner" id="card-inner">
       <div class="face card-front" id="card-front">
         <span class="card-no" id="card-no"></span>
-        <div class="card-scene"><img id="card-img" alt=""></div>
+        <div class="card-scene"><img id="card-img" alt=""><div id="card-lottie" class="card-lottie hidden"></div></div>
         <div class="card-text" id="card-name"></div>
         <div class="card-front-desc hidden" id="card-front-desc"></div>
         <span class="card-rarity" id="card-rarity"></span>
@@ -133,11 +133,13 @@
   </div>
 
   <div id="gift-code-view" class="gift-view hidden">
-    <h2>Код подарка</h2>
+    <h2>Подарок готов</h2>
     <p class="gift-cardname" id="gift-code-name"></p>
     <div class="gift-code" id="gift-code"></div>
-    <p class="muted">Продиктуй код другу или отправь сообщением — друг введёт его через 🎁 наверху экрана.</p>
-    <button id="btn-gift-copy" class="primary-btn">Скопировать код</button>
+    <p class="muted">Ссылка ведёт прямо на этот подарок: откроется красивый экран.
+      Для тех, у кого нет приложения, есть и код — через 🎁 наверху экрана.</p>
+    <button id="btn-gift-link" class="primary-btn">Ссылка-подарок 🎁</button>
+    <button id="btn-gift-copy" class="ghost-btn">Скопировать только код</button>
     <button id="btn-gift-share" class="ghost-btn hidden">Поделиться…</button>
     <button id="btn-gift-done" class="ghost-btn">Готово</button>
   </div>
@@ -153,13 +155,45 @@
   </div>
 </div>
 
+<!-- подарок по ссылке: экран получателя (раскрытие как в телеграме) -->
+<div id="flower-gift" class="overlay hidden">
+  <h2 class="fg-title" id="fg-title">Тебе подарок 🌷</h2>
+  <p class="muted fg-sub" id="fg-sub"></p>
+  <div class="card-shell fg-shell" id="fg-shell">
+    <div class="card-inner flipped" id="fg-inner">
+      <div class="face card-front" id="fg-front" data-pack="flowers">
+        <span class="card-no" id="fg-no"></span>
+        <div class="card-scene" id="fg-scene"></div>
+        <div class="card-text" id="fg-name"></div>
+        <div class="card-front-desc hidden" id="fg-desc"></div>
+        <span class="card-rarity" id="fg-rarity"></span>
+      </div>
+      <div class="face card-back" id="fg-back" data-pack="flowers">
+        <div class="card-back-inner">
+          <div class="card-back-mark"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="tap-hint" id="fg-hint">Тапни по карточке — она распакуется</p>
+  <button id="btn-fg-take" class="primary-btn hidden">Забрать 🌷</button>
+</div>
+
+<!-- полноэкранное раскрытие анимации подарка -->
+<div id="gift-stage" class="overlay hidden">
+  <div id="gs-holder"></div>
+  <div class="gs-name" id="gs-name"></div>
+  <button id="btn-gs-back" class="ghost-btn gs-back">К карточке</button>
+</div>
+
 <!-- отладка -->
 <div id="debug" class="hidden">
   <button id="btn-sim-350">пройти 350 м</button>
 </div>
 
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="cards.js?v=19"></script>
-<script src="app.js?v=28"></script>
+<script src="vendor/lottie-web/lottie.min.js"></script>
+<script src="cards.js?v=20"></script>
+<script src="app.js?v=31"></script>
 </body>
 </html>

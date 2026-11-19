@@ -30,6 +30,7 @@ let state = {
   collection: {},                 // id карточки -> сколько раз попадалась
   order: [],                      // id карточек в порядке получения (для галереи)
   giftsAccepted: [],              // канонические подарочные коды, принятые на этом телефоне
+  previewTulipGranted: false,     // одноразовый тестовый тюльпан в коллекции
   walks: 0,
   walksToday: 0,                  // карточек за сегодня
   day: '',                        // 'ГГГГ-ММ-ДД' — сброс дневного счётчика
@@ -59,6 +60,16 @@ function load() {
       state.order.push(id);
     }
   });
+  // Одноразово добавляем живой тюльпан для проверки на телефоне.
+  // Флаг не даёт получить его повторно после следующих запусков или подарка.
+  if (!state.previewTulipGranted) {
+    state.previewTulipGranted = true;
+    if (!(state.collection['flower-tulip'] > 0)) {
+      state.collection['flower-tulip'] = 1;
+      if (!state.order.includes('flower-tulip')) state.order.push('flower-tulip');
+    }
+    save();
+  }
 }
 
 /* ---------------- дневной лимит карточек ---------------- */
@@ -178,6 +189,26 @@ const els = {
   btnGiftDone: $('btn-gift-done'),
   btnGiftAccept: $('btn-gift-accept'),
   btnGiftCancel: $('btn-gift-cancel'),
+  cardLottie: $('card-lottie'),
+  btnGiftLink: $('btn-gift-link'),
+  flowerGift: $('flower-gift'),
+  fgTitle: $('fg-title'),
+  fgSub: $('fg-sub'),
+  fgShell: $('fg-shell'),
+  fgInner: $('fg-inner'),
+  fgFront: $('fg-front'),
+  fgBack: $('fg-back'),
+  fgNo: $('fg-no'),
+  fgScene: $('fg-scene'),
+  fgName: $('fg-name'),
+  fgDesc: $('fg-desc'),
+  fgRarity: $('fg-rarity'),
+  fgHint: $('fg-hint'),
+  btnFgTake: $('btn-fg-take'),
+  giftStage: $('gift-stage'),
+  gsHolder: $('gs-holder'),
+  gsName: $('gs-name'),
+  btnGsBack: $('btn-gs-back'),
   debug: $('debug'),
   btnSim350: $('btn-sim-350')
 };
@@ -232,6 +263,8 @@ function updateMeMarker() {
 /* ---------------- геолокация ---------------- */
 
 function startGeo() {
+  if (geoStarted) return;
+  geoStarted = true;
   if (!navigator.geolocation) {
     onGeoError({ code: 0, message: 'Браузер не поддерживает геолокацию' });
     return;
@@ -260,6 +293,56 @@ function onGeoError(err) {
   console.warn('geo error', err);
   if (!me) {
     els.hudText.textContent = 'Не вижу тебя на карте. Разреши геолокацию.';
+  }
+}
+
+/* ---------------- Lottie-анимации (пак «Цветы») ----------------
+
+   У карточек пака «Цветы» в img лежит .json — файл Lottie (живая
+   анимация, как подарки в телеграме). Проигрыватель подключён в
+   index.html (vendor/lottie-web). Обычные карточки — картинки. */
+
+let activeLottie = [];        // все запущенные анимации на экране
+
+function isLottieCard(card) { return !!(card.img && /\.json$/i.test(card.img)); }
+
+/** Остановить и выгрузить все анимации (закрыли экран — батарея отдохнула). */
+function destroyLotties() {
+  activeLottie.forEach(a => { try { a.destroy(); } catch (e) {} });
+  activeLottie = [];
+}
+
+function makeLottie(container, path) {
+  const inst = lottie.loadAnimation({
+    container: container, renderer: 'svg',
+    loop: true, autoplay: true, path: path
+  });
+  activeLottie.push(inst);
+  container._lottieInst = inst;
+  return inst;
+}
+
+/** Остановить анимацию конкретного контейнера (переподмотать карточку). */
+function destroyLottieIn(container) {
+  if (!container || !container._lottieInst) return;
+  const inst = container._lottieInst;
+  try { inst.destroy(); } catch (e) {}
+  activeLottie = activeLottie.filter(a => a !== inst);
+  container._lottieInst = null;
+}
+
+/** Наполнить «сцену» карточки: картинка-файл или Lottie-анимация. */
+function fillScene(container, card) {
+  container.innerHTML = '';
+  if (isLottieCard(card)) {
+    const box = document.createElement('div');
+    box.className = 'lottie-scene';
+    container.appendChild(box);
+    makeLottie(box, card.img);
+  } else {
+    const img = document.createElement('img');
+    img.src = card.img; img.alt = ''; img.decoding = 'async';
+    container.appendChild(img);
   }
 }
 
@@ -300,6 +383,11 @@ function showCard(card, fromGallery = false) {
   els.cardFront.classList.toggle('rare', card.rarity === 'rare');
   els.cardImg.src = card.img;
   els.cardImg.alt = card.name;
+  // у Lottie-карточек вместо <img> играет анимация в своём контейнере
+  destroyLottieIn(els.cardLottie);
+  els.cardImg.classList.toggle('hidden', isLottieCard(card));
+  els.cardLottie.classList.toggle('hidden', !isLottieCard(card));
+  if (isLottieCard(card)) makeLottie(els.cardLottie, card.img);
   els.cardName.textContent = card.name;
   const has = state.collection[card.id] || 0;
   els.cardRarity.textContent =
@@ -321,6 +409,7 @@ function showCard(card, fromGallery = false) {
 
 function hideCard() {
   els.cardOverlay.classList.add('hidden');
+  destroyLottieIn(els.cardLottie);   // цветок остановился, пока карточка закрыта
   const fromGallery = cardFromGallery;
   currentCard = null;
   cardFromGallery = false;
@@ -358,7 +447,7 @@ function showRewards(cards) {
       '<div class="card-inner flipped">' +
         '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + '" data-pack="' + pack + '">' +
           '<span class="card-no">№ ' + no + '</span>' +
-          '<div class="card-scene"><img src="' + card.img + '" alt=""></div>' +
+          '<div class="card-scene"></div>' +
           '<div class="card-text">' + card.name + '</div>' +
           '<span class="card-rarity">' + (card.rarity === 'rare' ? '★ редкая' : 'обычная') + '</span>' +
         '</div>' +
@@ -366,6 +455,8 @@ function showRewards(cards) {
           '<div class="card-back-inner"><div class="card-back-mark"></div></div>' +
         '</div>' +
       '</div>';
+    // картинка или Lottie-анимация, уникальная на каждую карточку
+    fillScene(shell.querySelector('.card-scene'), card);
     shell.addEventListener('click', () => {
       // первый тап — открыть, второй тап — улетела
       if (!shell.classList.contains('opened')) {
@@ -401,11 +492,25 @@ function showRewards(cards) {
         '<div class="card-inner">' +
           '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + '" data-pack="' + pack + '">' +
             '<span class="card-no">№ ' + no + '</span>' +
-            '<div class="card-scene"><img src="' + card.img + '" loading="lazy" alt=""></div>' +
+            '<div class="card-scene">' +
+              (isLottieCard(card)
+                ? ''   /* в ряду мини-карт анимации не играют — только живая картинка; замена ниже */
+                : '<img src="' + card.img + '" loading="lazy" alt="">') +
+            '</div>' +
             '<div class="card-text">' + card.name + '</div>' +
             '<span class="card-rarity">' + (card.rarity === 'rare' ? '★ редкая' : 'обычная') + '</span>' +
           '</div>' +
         '</div>';
+      // у цветочных мини-карт вместо заглушки — статичный кадр из анимации
+      // (ставим сам Lottie-контейнер, paused, чтобы ряд не «прыгал»)
+      if (isLottieCard(card)) {
+        const box = document.createElement('div');
+        box.className = 'lottie-scene';
+        shell.querySelector('.card-scene').appendChild(box);
+        const inst = makeLottie(box, card.img);
+        try { inst.stop(); } catch (e) {}
+        try { inst.goToAndStop(Math.floor(Math.random() * 60), true); } catch (e) {}
+      }
       els.rewardRow.appendChild(shell);
     });
     // подгоняем шрифт названий: самое длинное слово должно влезать
@@ -436,6 +541,7 @@ function showRewards(cards) {
 
 function hideRewards() {
   els.rewardOverlay.classList.add('hidden');
+  destroyLotties();
   if (pendingComplete) {
     // всё собрано — после награды показываем поздравление
     pendingComplete = false;
@@ -455,7 +561,19 @@ function makeMiniCard(card) {
   const ownedCount = state.collection[card.id] || 0;
   const el = document.createElement('div');
   el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
-  el.innerHTML = `<img src="${card.img}" alt="" loading="lazy" decoding="async"><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
+  el.innerHTML = `<div class="mini-scene"></div><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
+  const scene = el.querySelector('.mini-scene');
+  if (isLottieCard(card)) {
+    // в сетке галереи анимация застывает на кадре: движение — по тапу,
+    // не гуляем батарейку на 10 одновременно играющих карточек
+    const box = document.createElement('div');
+    box.className = 'lottie-scene';
+    scene.appendChild(box);
+    const inst = makeLottie(box, card.img);
+    try { inst.goToAndStop(Math.floor(Math.random() * 60), true); } catch (e) {}
+  } else {
+    scene.innerHTML = `<img src="${card.img}" alt="" loading="lazy" decoding="async">`;
+  }
   if (ownedCount > 1) {
     const badge = document.createElement('span');
     badge.className = 'mini-count';
@@ -711,10 +829,11 @@ function shiftMe(distM, brg) {
    дыркой снова начинает выпадать, «заработай заново». */
 
 const GIFT_WORD = {
-  gorod: { word: 'ЧУДИКИ', also: ['ГОРОД'] },
-  lisa:  { word: 'ОСЕНЬ',  also: ['ЛИСА', 'ЛИСИЧКА'] },
-  zima:  { word: 'ЗИМА',   also: ['ЗИМНИЙ'] },
-  kot:   { word: 'КОТ',    also: ['КОШКА', 'КОТИК'] }
+  gorod:   { word: 'ЧУДИКИ', also: ['ГОРОД'] },
+  lisa:    { word: 'ОСЕНЬ',  also: ['ЛИСА', 'ЛИСИЧКА'] },
+  zima:    { word: 'ЗИМА',   also: ['ЗИМНИЙ'] },
+  kot:     { word: 'КОТ',    also: ['КОШКА', 'КОТИК'] },
+  flowers: { word: 'ЦВЕТЫ',  also: ['ЦВЕТ', 'БУКЕТ'] }
 };
 const GIFT_CHECK = ['АИСТ', 'БОБР', 'ВОЛК', 'ГНОМ', 'ДЫНЯ', 'ЕРШ'];
 
@@ -803,6 +922,30 @@ function closeGift() {
   renderStats();
 }
 
+/** Ссылка-подарок: она сама несёт код, получателю вводить ничего не нужно. */
+function giftCardLink(code) {
+  return location.origin + location.pathname + '?gift=' + encodeURIComponent(code);
+}
+
+function copyGiftLink() {
+  const link = giftCardLink(els.giftCode.textContent);
+  const done = () => {
+    els.btnGiftLink.textContent = 'Ссылка скопирована ✓';
+    setTimeout(() => { els.btnGiftLink.textContent = 'Ссылка-подарок 🎁'; }, 1600);
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = link;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    ta.remove();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(link).then(done).catch(fallback);
+  else fallback();
+}
+
 function copyGiftCode() {
   const code = els.giftCode.textContent;
   const done = () => {
@@ -827,10 +970,11 @@ function giftShare() {
   if (navigator.share) {
     navigator.share({
       title: 'Гуляю-собираю — подарок!',
-      text: 'Дарю тебе карточку! Введи код: ' + code
+      text: 'Дарю тебе «' + (giftCard ? giftCard.name : 'подарок') + '»!',
+      url: giftCardLink(code)
     }).catch(() => {});
   } else {
-    copyGiftCode();
+    copyGiftLink();
   }
 }
 
@@ -865,6 +1009,107 @@ function acceptGiftDraft() {
   if (!wasComplete && CARDS.every(c => (state.collection[c.id] || 0) > 0)) {
     pendingComplete = true;
   }
+}
+
+/* ---------------- подарок по ссылке (экран получателя) ----------
+
+   Ссылка вида ...?gift=КОД&from=ИМЯ открывает красивый экран:
+   карточка рубашкой вверх → тап переворачивает, цветок оживает →
+   ещё тап открывает анимацию во весь экран (момент «как в телеграме»).
+   «Забрать» кладёт карточку в коллекцию получателя — на его телефоне.
+   Геолокация у получателя не спрашивается и карты в его сценарии нет. */
+
+let giftMode = false;     // открыты по подарочной ссылке — гостю GPS не нужен
+let geoStarted = false;
+let fgCard = null;        // карточка в подарке получателя
+let gsLottie = null;      // анимация на полноэкранном «раскрытии»
+
+function openGiftScreen(code) {
+  const res = decodeGiftCode(code);
+  if (res.error || !res.card) {
+    // код из ссылки не читается — получатель введёт его руками
+    els.giftInput.value = code;
+    showGiftView('input');
+    els.giftMsg.textContent = 'Код из ссылки не читается — проверь вручную.';
+    els.giftMsg.classList.add('err');
+    return;
+  }
+  fgCard = res.card;
+  els.fgTitle.textContent = 'Тебе подарок 🌷';
+  const from = new URLSearchParams(location.search).get('from');
+  els.fgSub.textContent = from ? 'Подарок от: ' + from : 'Живой цветок — только для тебя';
+  els.fgFront.dataset.pack = fgCard.pack || 'flowers';
+  els.fgBack.dataset.pack = fgCard.pack || 'flowers';
+  els.fgNo.textContent = '№ ' + String(CARDS.indexOf(fgCard) + 1).padStart(2, '0');
+  els.fgName.textContent = fgCard.name;
+  els.fgDesc.textContent = fgCard.desc || '';
+  els.fgDesc.classList.toggle('hidden', !fgCard.desc);
+  els.fgRarity.textContent = fgCard.rarity === 'rare' ? '★ редкая' : 'обычная';
+  destroyLottieIn(els.fgScene);
+  els.fgScene.innerHTML = '';
+  els.fgInner.classList.add('flipped');          // стартуем с рубашки
+  const canonical = encodeGiftCode(fgCard);
+  const already = state.giftsAccepted.includes(canonical) && (state.collection[fgCard.id] || 0) > 0;
+  els.btnFgTake.textContent = already ? 'Уже в твоей коллекции ✓' : 'Забрать 🌷';
+  els.btnFgTake.classList.add('hidden');
+  els.fgHint.textContent = 'Тапни по карточке — она распакуется';
+  els.flowerGift.classList.remove('hidden');
+}
+
+/** Тап по подарочной карточке: 1-й — распаковка, дальше — во весь экран. */
+function fgTap() {
+  if (!fgCard) return;
+  destroyLottieIn(els.fgScene);
+  if (!els.fgScene.childElementCount) {
+    els.fgInner.classList.remove('flipped');     // рубашка ушла — лицом
+    fillScene(els.fgScene, fgCard);              // цветок ожил
+    try { if (navigator.vibrate) navigator.vibrate(50); } catch (e) {}
+    els.btnFgTake.classList.remove('hidden');
+    els.fgHint.textContent = 'Нажми ещё раз — откроется во весь экран';
+    return;
+  }
+  // полноэкранное раскрытие подарка
+  els.gsName.textContent = fgCard.name;
+  els.gsHolder.innerHTML = '';
+  const box = document.createElement('div');
+  box.className = 'lottie-scene';
+  els.gsHolder.appendChild(box);
+  if (gsLottie) { try { gsLottie.destroy(); } catch (e) {} }
+  gsLottie = lottie.loadAnimation({
+    container: box, renderer: 'svg', loop: true, autoplay: true, path: fgCard.img
+  });
+  els.giftStage.classList.remove('hidden');
+  try { if (navigator.vibrate) navigator.vibrate([60, 60, 120]); } catch (e) {}
+}
+
+function fgCloseStage() {
+  els.giftStage.classList.add('hidden');
+  els.gsHolder.innerHTML = '';
+  if (gsLottie) { try { gsLottie.destroy(); } catch (e) {} gsLottie = null; }
+}
+
+/** Получатель забрал подарок: карточка в его коллекцию его же телефона. */
+function fgAccept() {
+  if (!fgCard) return;
+  const canonical = encodeGiftCode(fgCard);
+  if (!state.giftsAccepted.includes(canonical)) {
+    state.collection[fgCard.id] = (state.collection[fgCard.id] || 0) + 1;
+    state.order = (state.order || []).filter(id => id !== fgCard.id);
+    state.order.push(fgCard.id);
+    state.giftsAccepted.push(canonical);
+    save();
+  }
+  renderStats();
+  try { if (navigator.vibrate) navigator.vibrate([90, 80, 90]); } catch (e) {}
+  els.flowerGift.classList.add('hidden');
+  destroyLottieIn(els.fgScene);
+  fgCloseStage();
+  fgCard = null;
+  // показать её букет: коллекция, пак «Цветы»
+  renderCollection();
+  openPack('flowers');
+  els.collection.classList.remove('hidden');
+  if (!geoStarted) startGeo();    // если останется гулять — спросят гео тут, а не при входе
 }
 
 /* ---------------- заставка ---------------- */
@@ -952,6 +1197,17 @@ function bindUi() {
   els.btnGiftCopy.addEventListener('click', copyGiftCode);
   els.btnGiftShare.addEventListener('click', giftShare);
   els.btnGiftDone.addEventListener('click', closeGift);
+  els.btnGiftLink.addEventListener('click', copyGiftLink);
+
+  // подарок по ссылке: экран получателя
+  els.fgShell.addEventListener('click', fgTap);
+  els.btnFgTake.addEventListener('click', fgAccept);
+  els.btnGsBack.addEventListener('click', fgCloseStage);
+  els.flowerGift.addEventListener('click', e => {
+    // тап по фону экрана подарка не должен что-то ломать; закрывать нельзя —
+    // подарок без «Забрать» не сохранится. Заглушка-перехватчик.
+    if (e.target === els.flowerGift) e.stopPropagation();
+  });
   // «Поделиться» показываем, только если браузер умеет нативный шаринг
   if (!navigator.share) els.btnGiftShare.classList.add('hidden');
   else els.btnGiftShare.classList.remove('hidden');
@@ -968,11 +1224,11 @@ function init() {
   bindUi();
   renderStats();
 
-  // подарок пришёл ссылкой (?gift=ЧУДИКИ-7-АИСТ) — открываем ввод кода
+  // подарок пришёл ссылкой (?gift=ЦВЕТЫ-3-АИСТ&from=Коля) — экран получателя
   const giftParam = new URLSearchParams(location.search).get('gift');
   if (giftParam) {
-    els.giftInput.value = giftParam;
-    showGiftView('input');
+    giftMode = true;
+    openGiftScreen(giftParam);
   }
 
   // восстановить незавершённую прогулку
@@ -989,7 +1245,8 @@ function init() {
     drawIdleCircle();
   }
 
-  startGeo();
+  // получатель подарка GPS не спрашивает — только после «Забрать»
+  if (!giftMode) startGeo();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});

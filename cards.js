@@ -531,15 +531,101 @@ const CARDS = [
     img: 'img/kot/17_banochnyy_perepoloh.webp',
     pack: 'kot',
     rarity: 'common'
+  },
+
+  /* --- ПАК 5 «Цветы»: живые Lottie-анимации (как подарки в телеграме).
+         Картинка — анимация: img указывает на .json (Lottie).
+         Специально для подарков: карточка выпадает на прогулке,
+         а отсылается по ссылке ?gift=... --- */
+  {
+    id: 'flower-bouquet',
+    name: 'Букет-восторг',
+    img: 'img/flowers/01_bouquet.json',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'В нём один цветок для тебя, второй — для твоей улыбки.'
+  },
+  {
+    id: 'flower-tulip',
+    name: 'Ранние тюльпаны',
+    img: 'img/flowers/02_tulip.json',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Весна пришла — не предупредив.'
+  },
+  {
+    id: 'flower-blooming',
+    name: 'Расцветший сад',
+    img: 'img/flowers/03_blooming.json',
+    pack: 'flowers',
+    rarity: 'rare',
+    desc: 'На минуты раскрывает все бутоны разом.'
+  },
+  {
+    id: 'flower-roses',
+    name: 'Чайные розы',
+    img: 'img/flowers/04_roses.json',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Пахнут, как вечером в среду.'
+  },
+  {
+    id: 'flower-sunflower',
+    name: 'Подсолнух-солнце',
+    img: 'img/flowers/05_sunflower.json',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Верте за собой, где бы ты ни была.'
+  },
+  {
+    id: 'flower-daisy',
+    name: 'Ромашки в дожде',
+    img: 'img/flowers/06_daisy.json',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Считаются на «люблю» и наоборот.'
+  },
+  {
+    id: 'flower-peony',
+    name: 'Пышный пион',
+    img: 'img/flowers/07_peony.json',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Цветёт три дня. Все три — глядит только на тебя.'
+  },
+  {
+    id: 'flower-lilac',
+    name: 'Веточка сирени',
+    img: 'img/flowers/08_lilac.json',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Найдёшь пятилепестковую — загадай что-нибудь.'
+  },
+  {
+    id: 'flower-heart',
+    name: 'Цветочное сердце',
+    img: 'img/flowers/09_floralheart.json',
+    pack: 'flowers',
+    rarity: 'rare',
+    desc: 'Собрано из лепестков, а бьётся, как настоящее.'
+  },
+  {
+    id: 'flower-giftpack',
+    name: 'Цветочный подарок',
+    img: 'img/flowers/10_giftpack.json',
+    pack: 'flowers',
+    rarity: 'rare',
+    desc: 'Внутри — ещё один букет. Он не кончается.'
   }
 ];
 
 /* Коллекции (паки) в порядке показа в галерее. */
 const PACKS = [
-  { key: 'gorod', title: 'Чудики' },
-  { key: 'lisa',  title: 'Лисичка.Осень' },
-  { key: 'zima',  title: 'Лис.Зима' },
-  { key: 'kot',   title: 'Озорной кот' }
+  { key: 'gorod',   title: 'Чудики' },
+  { key: 'lisa',    title: 'Лисичка.Осень' },
+  { key: 'zima',    title: 'Лис.Зима' },
+  { key: 'kot',     title: 'Озорной кот' },
+  { key: 'flowers', title: 'Цветы' }
 ];
 const PACK_BY_KEY = Object.fromEntries(PACKS.map(p => [p.key, p]));
 

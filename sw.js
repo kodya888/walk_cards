@@ -3,14 +3,15 @@
    поднимай номер версии (ниже и в ?v=... у тегов в index.html),
    иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v34';
+const VERSION = 'wc-v37';
 
 const ASSETS = [
   './',
   'index.html',
-  'style.css?v=26',
-  'app.js?v=28',
-  'cards.js?v=19',
+  'style.css?v=27',
+  'app.js?v=31',
+  'cards.js?v=20',
+  'vendor/lottie-web/lottie.min.js',
   'manifest.json',
   'vendor/leaflet/leaflet.css',
   'vendor/leaflet/leaflet.js',
@@ -23,7 +24,18 @@ const ASSETS = [
   'img/2-nochnoy_smotritel_fonarey.svg',
   'img/3_inspektor_pirozhkov.svg',
   'img/backs/gorod_logo.svg',
+  'img/backs/flowers_logo.svg',
   'img/backs/zima_logo.png',
+  'img/flowers/01_bouquet.json',
+  'img/flowers/02_tulip.json',
+  'img/flowers/03_blooming.json',
+  'img/flowers/04_roses.json',
+  'img/flowers/05_sunflower.json',
+  'img/flowers/06_daisy.json',
+  'img/flowers/07_peony.json',
+  'img/flowers/08_lilac.json',
+  'img/flowers/09_floralheart.json',
+  'img/flowers/10_giftpack.json',
   'img/lisa/01_borovik.webp',
   'img/lisa/02_shapka_lisichka.webp',
   'img/lisa/03_lisa_ryaninushka.webp',

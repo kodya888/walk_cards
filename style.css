@@ -359,6 +359,7 @@ html, body {
   flex: 1 1 auto; width: 100%;
   display: flex; align-items: center; justify-content: center;
   min-height: 0; padding: 18px 6px 6px;
+  position: relative;   /* опора для абсолютного контейнера Lottie */
 }
 .card-scene img {
   max-width: 100%; max-height: 100%;
@@ -622,3 +623,67 @@ html, body {
 
 /* кнопка «Подарить другу» в оверлее карточки — под «Вернуть в галерею» */
 .card-gift-btn { margin-top: 10px; }
+
+/* ===== пак «Цветы»: Lottie-анимации как подарки в телеграме ===== */
+
+/* контейнер анимации внутри большой карточки занимает всю сцену */
+.card-lottie, .lottie-scene {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.card-lottie, .lottie-scene, .lottie-scene svg {
+  max-width: 100%; max-height: 100%;
+}
+.card-scene .card-lottie, .card-scene .lottie-scene { position: absolute; }
+.card-scene .lottie-scene svg {
+  width: 100%; height: 100%; filter: drop-shadow(0 8px 14px rgba(60,40,10,.25));
+}
+/* внутри мини-карточек сцена фиксированной высоты */
+.mini-scene {
+  flex: 1 1 auto; width: 100%; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.mini-scene .lottie-scene, .mini-scene .lottie-scene svg {
+  max-width: 100%; max-height: 100%;
+}
+.mini-scene img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* рубашка пака «Цветы»: розовое поле, силуэт тюльпана */
+.card-back[data-pack="flowers"] {
+  --back-field: #c34f7d;
+  --mark-ink: #c34f7d;
+}
+.card-back[data-pack="flowers"] .card-back-mark::before {
+  -webkit-mask-image: url("img/backs/flowers_logo.svg");
+  mask-image: url("img/backs/flowers_logo.svg");
+  -webkit-mask-size: 74%; mask-size: 74%;
+}
+
+/* ===== экран получателя подарка (?gift=...) ===== */
+#flower-gift { gap: 4px; }
+.fg-title {
+  margin: 0; font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px; font-weight: 700; color: var(--gold-hi);
+  text-shadow: 0 0 24px rgba(255,192,64,.4);
+}
+.fg-sub { margin: 2px 0 14px; }
+.fg-shell { cursor: pointer; }
+#flower-gift .tap-hint { margin: 12px 0 2px; }
+#flower-gift .primary-btn { max-width: 340px; }
+
+/* полноэкранное раскрытие: анимация занимает почти весь экран */
+#gift-stage { gap: 12px; }
+#gs-holder {
+  position: relative;
+  width: min(92vw, 92dvh * 0.85);
+  aspect-ratio: 1 / 1;
+  display: flex; align-items: center; justify-content: center;
+}
+#gs-holder .lottie-scene { position: absolute; inset: 0; }
+#gs-holder .lottie-scene svg { width: 100%; height: 100%; }
+.gs-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px; font-weight: 600; color: var(--ink); text-align: center;
+}
+.gs-back { max-width: 260px; margin-top: 10px; }
