@@ -562,6 +562,14 @@ const CARDS = [
     desc: 'Приносит по цветку за раз — и все они для тебя.'
   },
   {
+    id: 'flower-bloom',
+    name: 'Живой букет',
+    img: 'img/flowers/04_flowerbloom.json',
+    pack: 'flowers',
+    rarity: 'rare',
+    desc: 'Растёт на глазах, как будто время ускорили.'
+  },
+  {
     id: 'flower-blooming',
     name: 'Расцветший сад',
     img: 'img/flowers/03_blooming.json',

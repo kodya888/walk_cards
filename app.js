@@ -32,6 +32,7 @@ let state = {
   giftsAccepted: [],              // канонические подарочные коды, принятые на этом телефоне
   previewTulipGranted: false,     // одноразовый тестовый тюльпан в коллекции
   previewFriendGranted: false,    // одноразовый тестовый «Цветочный друг» в коллекции
+  previewBloomGranted: false,     // одноразовый тестовый «Живой букет» в коллекции
   walks: 0,
   walksToday: 0,                  // карточек за сегодня
   day: '',                        // 'ГГГГ-ММ-ДД' — сброс дневного счётчика
@@ -77,6 +78,15 @@ function load() {
     if (!(state.collection['flower-friend'] > 0)) {
       state.collection['flower-friend'] = 1;
       if (!state.order.includes('flower-friend')) state.order.push('flower-friend');
+    }
+    save();
+  }
+  // Одноразово добавляем «Живой букет» для проверки на телефоне.
+  if (!state.previewBloomGranted) {
+    state.previewBloomGranted = true;
+    if (!(state.collection['flower-bloom'] > 0)) {
+      state.collection['flower-bloom'] = 1;
+      if (!state.order.includes('flower-bloom')) state.order.push('flower-bloom');
     }
     save();
   }
