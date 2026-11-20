@@ -644,6 +644,15 @@ const CARDS = [
     pack: 'flowers',
     rarity: 'rare',
     desc: 'Внутри — ещё один букет. Он не кончается.'
+  },
+  {
+    id: 'flower-box',
+    name: 'Коробочка-прыгушка',
+    img: 'img/flowers/11_flowerbox.json',
+    thumb: 'img/flowers/11_flowerbox_thumb.webp',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Сначала пустая — а потом прыг! И уже букет.'
   }
 ];
 

@@ -3,7 +3,7 @@
    поднимай номер версии (ниже и в ?v=... у тегов в index.html),
    иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v44';
+const VERSION = 'wc-v45';
 
 const ASSETS = [
   './',
@@ -43,6 +43,8 @@ const ASSETS = [
   'img/flowers/08_lilac.json',
   'img/flowers/09_floralheart.json',
   'img/flowers/10_giftpack.json',
+  'img/flowers/11_flowerbox.json',
+  'img/flowers/11_flowerbox_thumb.webp',
   'img/lisa/01_borovik.webp',
   'img/lisa/02_shapka_lisichka.webp',
   'img/lisa/03_lisa_ryaninushka.webp',
