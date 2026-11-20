@@ -359,12 +359,12 @@ def flower_layer(ind, f, nm):
     lean = f.get('lean', round((x - 250) / 6.0, 1))     # левые — влево, правые — вправо
     tilt = f.get('tilt', 2.5)
     rt_keys = [kf(t0, [lean], LIN)]
-    t, amp, sign = t0 + 30, tilt, 1
+    t, amp, sign = t0 + 30, abs(tilt), 1
     while t < T_SINK - 2:
         rt_keys.append(kf(t, [lean + sign * amp], EASE))
-        t += 16
+        t += 18
         sign = -sign
-        amp = max(1.0, amp * 0.7)
+        amp = max(1.3, amp * 0.85)      # затухает медленнее — качается до конца
     rt_keys += [kf(T_SINK, [lean], LIN), kf(T_SINK + 8, [lean], LIN),
                 kf(OP - 1, [lean], LIN)]
     rt = anim(rt_keys)
