@@ -135,10 +135,27 @@ def anim(keys):
 # ======================================================================
 #  Цветы
 # ======================================================================
-def daisy_shapes(h, petals, pr, pw, rc, pet_c, cen_c, dot_c=None):
-    """Ромашка: n лепестков-эллипсов вокруг центра. Основание в (0,0)."""
+STEM_C = hx('2d6b3c')      # тёмно-зелёный — стебли
+LEAF_C = hx('57a05c')      # светлее — листья
+
+
+def stem_group(top_y, stem_c, leaf_c=None, w=7, curl=10, leaves=2):
+    """Стебель от (0,0) до (0, top_y) с лёгким изгибом и парой листьев."""
+    sh = [pth([(0, 0), (0, top_y)],
+              [[0, 0], [-curl, 0]], [[curl, 0], [0, 0]], nm="stem")]
+    shapes = [grp(sh, stroke(stem_c, w))]
+    if leaf_c and leaves >= 1:
+        shapes.append(leaf(-13, top_y * 0.45, 9, 21, -34, leaf_c, (0, top_y * 0.5)))
+    if leaf_c and leaves >= 2:
+        shapes.append(leaf(13, top_y * 0.62, 9, 19, 30, leaf_c, (0, top_y * 0.56)))
+    return shapes
+
+
+def daisy_shapes(h, petals, pr, pw, rc, pet_c, cen_c, dot_c=None,
+                 stem_c=STEM_C, leaf_c=LEAF_C, curl=10):
+    """Ромашка: изогнутый стебель + n лепестков вокруг центра."""
     hc = (0, -h)
-    shapes = []
+    shapes = stem_group(-h + rc * 0.75, stem_c, leaf_c, curl=curl)
     for i in range(petals):
         deg = i * 360.0 / petals
         petal = [ell(0, -h - pr, pw, pr, "petal"), fill(pet_c)]
@@ -150,17 +167,17 @@ def daisy_shapes(h, petals, pr, pw, rc, pet_c, cen_c, dot_c=None):
     return shapes
 
 
-def pop_shapes(h, r, outer_c, ring_c, inner_c):
-    """Круглый цветок: большой круг + кольцо + серединка."""
-    return [
+def pop_shapes(h, r, outer_c, ring_c, inner_c, stem_c=STEM_C, leaf_c=LEAF_C, curl=8):
+    """Круглый цветок на изогнутом стебле: круг + кольцо + серединка."""
+    return stem_group(-h + r * 0.4, stem_c, leaf_c, w=8, curl=curl) + [
         grp(ell(0, -h, r, r, "big"), fill(outer_c)),
         grp(ell(0, -h, r * 0.62, r * 0.62, "ring"), fill(ring_c)),
         grp(ell(0, -h, r * 0.26, r * 0.26, "mid"), fill(inner_c)),
     ]
 
 
-def tulip_shapes(h, head_c, stem_c):
-    """Тюльпан: стебель + чашечка. Основание в (0,0)."""
+def tulip_shapes(h, head_c, stem_c=STEM_C, leaf_c=LEAF_C, curl=9):
+    """Тюльпан: изогнутый стебель + чашечка, стебель заходит внутрь чашки."""
     top = -h
     cup = pth(
         [(-34, top + 34), (34, top + 34), (24, top - 6), (0, top - 26), (-24, top - 6)],
@@ -170,11 +187,24 @@ def tulip_shapes(h, head_c, stem_c):
         [(-16, top + 30), (16, top + 30), (10, top - 16), (0, top - 24), (-10, top - 16)],
         [[0, 0], [3, -16], [2, -12], [0, -6], [-2, -12]],
         [[-5, 2], [-2, -14], [-2, -12], [2, -12], [5, 2]], c=True)
-    stem = pth([(0, 2), (0, top + 36)], [[0, 0], [0, 0]], [[0, 0], [0, 0]], nm="stem")
-    return [
-        grp(stem, stroke(stem_c, 8)),
+    return stem_group(top + 34, stem_c, leaf_c, w=8, curl=curl) + [
         grp(cup, fill(head_c)),
         grp(inner, fill(mix(head_c, [1, 1, 1], 0.28))),
+    ]
+
+
+def bud_shapes(h, head_c, stem_c=STEM_C, leaf_c=LEAF_C, curl=8):
+    """Бутончик: слезинка на стебле с прицветниками."""
+    top = -h
+    drop = pth(
+        [(-17, top + 14), (0, top - 26), (17, top + 14)],
+        [[0, 0], [-6, 16], [0, -6]],
+        [[0, -6], [8, 14], [0, 0]], c=True)
+    return stem_group(top + 20, stem_c, leaf_c, curl=curl, leaves=1) + [
+        grp(drop, fill(head_c)),
+        grp(ell(0, top - 20, 6, 5, "hl"), fill(mix(head_c, [1, 1, 1], 0.45))),
+        leaf(-13, top + 12, 7, 14, -38, leaf_c, (0, top + 18)),
+        leaf(11, top + 14, 7, 13, 32, leaf_c, (0, top + 20)),
     ]
 
 
@@ -193,10 +223,10 @@ def sprig_shapes(h, leaf_c, stem_c):
     return shapes
 
 
-def bell_shapes(h, r, pet_c, cen_c):
-    """Простой цветок из 5 круглых лепестков."""
+def bell_shapes(h, r, pet_c, cen_c, stem_c=STEM_C, leaf_c=LEAF_C, curl=8):
+    """Пятилепестковый цветок на изогнутом стебле."""
     hc = (0, -h)
-    shapes = []
+    shapes = stem_group(-h + r * 0.5, stem_c, leaf_c, curl=curl)
     for i in range(5):
         deg = i * 72.0 + 14
         shapes.append(g_rot(
@@ -212,34 +242,40 @@ KINDS = {
     'tulip': tulip_shapes,
     'sprig': sprig_shapes,
     'bell': bell_shapes,
+    'bud': bud_shapes,
 }
 
-GREEN = hx('2d6b3c')
+GREEN = STEM_C
 
 
 def flower_shapes(f):
     k = f['kind']
     c = f.get('colors', {})
+    stem_c = c.get('stem', STEM_C)
+    leaf_c = c.get('leaf', LEAF_C)
     if k == 'daisy':
         return daisy_shapes(
-            f['h'], f.get('petals', 7), f.get('pr', 16), f.get('pw', 7),
+            f['h'], f.get('petals', 7), f.get('pr', 17), f.get('pw', 8),
             f.get('rc', 13),
             c.get('petal', hx('f28fb2')), c.get('center', hx('ffd166')),
-            c.get('dot'))
+            c.get('dot'), stem_c, leaf_c, f.get('curl', 10))
     if k == 'pop':
         return pop_shapes(
             f['h'], f.get('r', 30),
             c.get('outer', hx('6fa8ff')), c.get('ring', hx('b3d4ff')),
-            c.get('inner', hx('2b5fc9')))
+            c.get('inner', hx('2b5fc9')), stem_c, leaf_c, f.get('curl', 8))
     if k == 'tulip':
         return tulip_shapes(f['h'], c.get('head', hx('e94f5f')),
-                            c.get('stem', GREEN))
-    if k == 'sprig':
-        return sprig_shapes(f['h'], c.get('leaf', hx('57a05c')),
-                            c.get('stem', GREEN))
+                            stem_c, leaf_c, f.get('curl', 9))
+    if k == 'bud':
+        return bud_shapes(f['h'], c.get('head', hx('f28fb2')),
+                          stem_c, leaf_c, f.get('curl', 8))
     if k == 'bell':
         return bell_shapes(f['h'], f.get('r', 26),
-                           c.get('petal', hx('ffd166')), c.get('center', hx('e8873a')))
+                           c.get('petal', hx('ffd166')), c.get('center', hx('e8873a')),
+                           stem_c, leaf_c, f.get('curl', 8))
+    if k == 'sprig':
+        return sprig_shapes(f['h'], leaf_c, stem_c)
     raise KeyError(k)
 
 
@@ -412,57 +448,95 @@ BOX_STYLES = {
     'purple': {'body': '9b7fd6', 'edge': '7560ad', 'inner': '332a4f', 'deco': 'e6dcff'},
 }
 
-# Варианты карточек (каждый — самостоятельный файл).
-# Порядок в flowers: первый в списке — ближе к зрителю (перекрывает других).
-# x: 150..350 — держим внутри стенки, иначе цветок торчит мимо коробки.
-# t0: кадр старта (26..60) — чем больше, тем позже выпрыгивает.
+# Состав букета в «настоящий» вид: сзади высокая зелень, в середине крупные
+# цветы на стеблях, впереди низкий ряд; порядок в flowers — первый ближе
+# к зрителю (перекрывает остальных).
+# x: 145..355 — держим внутри стенки, иначе цветок торчит мимо коробки.
+# t0: кадр старта (26..70) — чем больше, тем позже выпрыгивает.
 BOX_SHOTS = {
     'flowerbox': {
         'box': BOX_STYLES['orange'],
         'flowers': [
-            {'kind': 'sprig', 'x': 168, 'h': 200, 't0': 30, 'tilt': 2.5,
-             'colors': {'leaf': hx('6db46a')}},
-            {'kind': 'sprig', 'x': 330, 'h': 190, 't0': 33, 'tilt': -2.5,
-             'colors': {'leaf': hx('8cc86f')}},
-            {'kind': 'bell', 'x': 196, 'h': 150, 'r': 27, 't0': 38, 'tilt': -3,
+            # --- передний ряд: низкие цветы с короткими стеблями ---
+            {'kind': 'pop', 'x': 262, 'h': 105, 'r': 24, 't0': 64, 'tilt': -2.5,
+             'colors': P_ORANGE},
+            {'kind': 'daisy', 'x': 216, 'h': 118, 'petals': 6, 'pr': 13, 'pw': 7,
+             'rc': 10, 't0': 60, 'tilt': 3,
+             'colors': {'petal': hx('fff6e8'), 'center': hx('e8873a')}},
+            {'kind': 'bud', 'x': 322, 'h': 128, 't0': 68, 'tilt': 2,
+             'colors': {'head': hx('ef6a9e')}},
+            {'kind': 'bell', 'x': 172, 'h': 138, 'r': 24, 't0': 56, 'tilt': -3,
              'colors': P_YEL},
-            {'kind': 'tulip', 'x': 268, 'h': 215, 't0': 44, 'tilt': 2,
-             'colors': P_RED},
-            {'kind': 'daisy', 'x': 316, 'h': 165, 'petals': 7, 't0': 50, 'tilt': 3,
-             'colors': P_PINK},
-            {'kind': 'pop', 'x': 236, 'h': 150, 'r': 27, 't0': 56, 'tilt': -2,
+            # --- средний ряд ---
+            {'kind': 'pop', 'x': 306, 'h': 155, 'r': 26, 't0': 50, 'tilt': 2.5,
              'colors': P_BLUE},
+            {'kind': 'daisy', 'x': 252, 'h': 172, 'petals': 7, 't0': 45, 'tilt': -2.5,
+             'colors': P_PINK},
+            {'kind': 'tulip', 'x': 338, 'h': 192, 't0': 52, 'tilt': 3,
+             'colors': {'head': hx('f2c14e')}},
+            {'kind': 'tulip', 'x': 196, 'h': 222, 't0': 38, 'tilt': -2,
+             'colors': P_RED},
+            # --- задняя зелень (выглядывает между цветами) ---
+            {'kind': 'sprig', 'x': 172, 'h': 185, 't0': 28, 'tilt': 2.5,
+             'colors': {'leaf': hx('6db46a')}},
+            {'kind': 'sprig', 'x': 255, 'h': 170, 't0': 31, 'tilt': -2,
+             'colors': {'leaf': hx('8cc86f')}},
+            {'kind': 'sprig', 'x': 332, 'h': 182, 't0': 34, 'tilt': 2,
+             'colors': {'leaf': hx('57a05c')}},
         ],
     },
     'flowerboxb': {
         'box': BOX_STYLES['blue'],
         'flowers': [
-            {'kind': 'sprig', 'x': 200, 'h': 195, 't0': 30, 'tilt': 2.5,
-             'colors': {'leaf': hx('6db46a')}},
-            {'kind': 'daisy', 'x': 246, 'h': 175, 'petals': 8, 't0': 38, 'tilt': -3,
-             'colors': P_PINK},
-            {'kind': 'bell', 'x': 300, 'h': 148, 'r': 25, 't0': 45, 'tilt': 3,
+            {'kind': 'bud', 'x': 250, 'h': 112, 't0': 68, 'tilt': -2,
+             'colors': {'head': hx('ff8f5e')}},
+            {'kind': 'daisy', 'x': 296, 'h': 122, 'petals': 6, 'pr': 13, 'pw': 7,
+             'rc': 10, 't0': 62, 'tilt': 3,
+             'colors': {'petal': hx('fff6e8'), 'center': hx('e8873a')}},
+            {'kind': 'pop', 'x': 206, 'h': 136, 'r': 24, 't0': 57, 'tilt': 2.5,
+             'colors': {'outer': hx('ffd166'), 'ring': hx('ffe7a8'),
+                        'inner': hx('d9542f')}},
+            {'kind': 'bell', 'x': 334, 'h': 148, 'r': 24, 't0': 52, 'tilt': 3,
              'colors': P_ORANGE},
-            {'kind': 'pop', 'x': 180, 'h': 150, 'r': 26, 't0': 52, 'tilt': 2,
-             'colors': P_YEL and {'outer': hx('ffd166'), 'ring': hx('ffe7a8'),
-                                  'inner': hx('d9542f')}},
-            {'kind': 'sprig', 'x': 330, 'h': 185, 't0': 58, 'tilt': -2,
+            {'kind': 'daisy', 'x': 168, 'h': 168, 'petals': 8, 't0': 46, 'tilt': -3,
+             'colors': P_PINK},
+            {'kind': 'pop', 'x': 254, 'h': 182, 'r': 26, 't0': 42, 'tilt': 2,
+             'colors': {'outer': hx('e05055'), 'ring': hx('f08a8a'),
+                        'inner': hx('8e2030')}},
+            {'kind': 'tulip', 'x': 330, 'h': 200, 't0': 36, 'tilt': -2.5,
+             'colors': {'head': hx('f2c14e')}},
+            {'kind': 'sprig', 'x': 158, 'h': 192, 't0': 28, 'tilt': 2.5,
+             'colors': {'leaf': hx('6db46a')}},
+            {'kind': 'sprig', 'x': 292, 'h': 176, 't0': 31, 'tilt': -2,
+             'colors': {'leaf': hx('8cc86f')}},
+            {'kind': 'sprig', 'x': 218, 'h': 182, 't0': 34, 'tilt': 2,
              'colors': {'leaf': hx('57a05c')}},
         ],
     },
     'flowerboxc': {
         'box': BOX_STYLES['pink'],
         'flowers': [
-            {'kind': 'sprig', 'x': 175, 'h': 205, 't0': 30, 'tilt': 2,
-             'colors': {'leaf': hx('7bb86b')}},
-            {'kind': 'tulip', 'x': 220, 'h': 210, 't0': 37, 'tilt': -2.5,
-             'colors': {'head': hx('f2c14e')}},
-            {'kind': 'pop', 'x': 285, 'h': 150, 'r': 27, 't0': 44, 'tilt': 2,
+            {'kind': 'pop', 'x': 260, 'h': 108, 'r': 24, 't0': 65, 'tilt': -2.5,
              'colors': P_BLUE},
-            {'kind': 'bell', 'x': 330, 'h': 145, 'r': 24, 't0': 51, 'tilt': -3,
-             'colors': {'petal': hx('ffffff'), 'center': hx('ffd166')}},
-            {'kind': 'daisy', 'x': 258, 'h': 170, 'petals': 7, 't0': 58, 'tilt': 2.5,
+            {'kind': 'bud', 'x': 310, 'h': 120, 't0': 69, 'tilt': 2,
+             'colors': {'head': hx('f2c14e')}},
+            {'kind': 'bell', 'x': 210, 'h': 132, 'r': 23, 't0': 58, 'tilt': 3,
+             'colors': {'petal': hx('fff6e8'), 'center': hx('e8873a')}},
+            {'kind': 'tulip', 'x': 168, 'h': 165, 't0': 53, 'tilt': -3,
+             'colors': {'head': hx('f2c14e')}},
+            {'kind': 'pop', 'x': 345, 'h': 158, 'r': 25, 't0': 49, 'tilt': 2.5,
+             'colors': {'outer': hx('ff9e5e'), 'ring': hx('ffc79a'),
+                        'inner': hx('d9542f')}},
+            {'kind': 'daisy', 'x': 262, 'h': 178, 'petals': 7, 't0': 44, 'tilt': 2.5,
              'colors': {'petal': hx('e05055'), 'center': hx('fff3c4')}},
+            {'kind': 'tulip', 'x': 300, 'h': 205, 't0': 37, 'tilt': -2,
+             'colors': {'head': hx('6fa8ff')}},
+            {'kind': 'sprig', 'x': 172, 'h': 190, 't0': 28, 'tilt': 2,
+             'colors': {'leaf': hx('7bb86b')}},
+            {'kind': 'sprig', 'x': 232, 'h': 172, 't0': 31, 'tilt': -2.5,
+             'colors': {'leaf': hx('6db46a')}},
+            {'kind': 'sprig', 'x': 330, 'h': 186, 't0': 34, 'tilt': 2.5,
+             'colors': {'leaf': hx('57a05c')}},
         ],
     },
 }
