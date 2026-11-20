@@ -417,7 +417,7 @@ BOX_STYLES = {
 # x: 150..350 — держим внутри стенки, иначе цветок торчит мимо коробки.
 # t0: кадр старта (26..60) — чем больше, тем позже выпрыгивает.
 BOX_SHOTS = {
-    'flowerbox_a': {
+    'flowerbox': {
         'box': BOX_STYLES['orange'],
         'flowers': [
             {'kind': 'sprig', 'x': 168, 'h': 200, 't0': 30, 'tilt': 2.5,
@@ -434,7 +434,7 @@ BOX_SHOTS = {
              'colors': P_BLUE},
         ],
     },
-    'flowerbox_b': {
+    'flowerboxb': {
         'box': BOX_STYLES['blue'],
         'flowers': [
             {'kind': 'sprig', 'x': 200, 'h': 195, 't0': 30, 'tilt': 2.5,
@@ -450,7 +450,7 @@ BOX_SHOTS = {
              'colors': {'leaf': hx('57a05c')}},
         ],
     },
-    'flowerbox_c': {
+    'flowerboxc': {
         'box': BOX_STYLES['pink'],
         'flowers': [
             {'kind': 'sprig', 'x': 175, 'h': 205, 't0': 30, 'tilt': 2,
