@@ -567,7 +567,7 @@ const CARDS = [
     img: 'img/flowers/04_flowerbloom.json',
     pack: 'flowers',
     rarity: 'rare',
-    desc: 'Растёт на глазах, как будто время ускорили.'
+    desc: 'Растёт на глазах.'
   },
   {
     id: 'flower-blooming',
