@@ -554,6 +554,14 @@ const CARDS = [
     desc: 'Весна пришла — не предупредив.'
   },
   {
+    id: 'flower-friend',
+    name: 'Цветочный друг',
+    img: 'img/flowers/03_flowerfriend.json',
+    pack: 'flowers',
+    rarity: 'rare',
+    desc: 'Приносит по цветку за раз — и все они для тебя.'
+  },
+  {
     id: 'flower-blooming',
     name: 'Расцветший сад',
     img: 'img/flowers/03_blooming.json',

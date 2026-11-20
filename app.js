@@ -31,6 +31,7 @@ let state = {
   order: [],                      // id карточек в порядке получения (для галереи)
   giftsAccepted: [],              // канонические подарочные коды, принятые на этом телефоне
   previewTulipGranted: false,     // одноразовый тестовый тюльпан в коллекции
+  previewFriendGranted: false,    // одноразовый тестовый «Цветочный друг» в коллекции
   walks: 0,
   walksToday: 0,                  // карточек за сегодня
   day: '',                        // 'ГГГГ-ММ-ДД' — сброс дневного счётчика
@@ -67,6 +68,15 @@ function load() {
     if (!(state.collection['flower-tulip'] > 0)) {
       state.collection['flower-tulip'] = 1;
       if (!state.order.includes('flower-tulip')) state.order.push('flower-tulip');
+    }
+    save();
+  }
+  // Одноразово добавляем «Цветочного друга» для проверки на телефоне.
+  if (!state.previewFriendGranted) {
+    state.previewFriendGranted = true;
+    if (!(state.collection['flower-friend'] > 0)) {
+      state.collection['flower-friend'] = 1;
+      if (!state.order.includes('flower-friend')) state.order.push('flower-friend');
     }
     save();
   }
@@ -1056,30 +1066,22 @@ function openGiftScreen(code) {
   els.flowerGift.classList.remove('hidden');
 }
 
-/** Тап по подарочной карточке: 1-й — распаковка, дальше — во весь экран. */
+/** Тап по подарочной карточке: рубашка ↔ лицо — как у обычной карты. */
 function fgTap() {
   if (!fgCard) return;
-  destroyLottieIn(els.fgScene);
-  if (!els.fgScene.childElementCount) {
-    els.fgInner.classList.remove('flipped');     // рубашка ушла — лицом
+  if (els.fgInner.classList.contains('flipped')) {
+    // рубашка ушла — лицом
+    els.fgInner.classList.remove('flipped');
     fillScene(els.fgScene, fgCard);              // цветок ожил
     try { if (navigator.vibrate) navigator.vibrate(50); } catch (e) {}
     els.btnFgTake.classList.remove('hidden');
-    els.fgHint.textContent = 'Нажми ещё раз — откроется во весь экран';
-    return;
+    els.fgHint.textContent = 'Тапни ещё раз — вернётся рубашка';
+  } else {
+    // лицом ушла — вернулась рубашка
+    els.fgInner.classList.add('flipped');
+    destroyLottieIn(els.fgScene);                // цветок уснул за рубашкой
+    els.fgHint.textContent = 'Тапни по карточке — она распакуется';
   }
-  // полноэкранное раскрытие подарка
-  els.gsName.textContent = fgCard.name;
-  els.gsHolder.innerHTML = '';
-  const box = document.createElement('div');
-  box.className = 'lottie-scene';
-  els.gsHolder.appendChild(box);
-  if (gsLottie) { try { gsLottie.destroy(); } catch (e) {} }
-  gsLottie = lottie.loadAnimation({
-    container: box, renderer: 'svg', loop: true, autoplay: true, path: fgCard.img
-  });
-  els.giftStage.classList.remove('hidden');
-  try { if (navigator.vibrate) navigator.vibrate([60, 60, 120]); } catch (e) {}
 }
 
 function fgCloseStage() {

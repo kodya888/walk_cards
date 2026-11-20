@@ -3,13 +3,13 @@
    поднимай номер версии (ниже и в ?v=... у тегов в index.html),
    иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v37';
+const VERSION = 'wc-v40';
 
 const ASSETS = [
   './',
   'index.html',
   'style.css?v=27',
-  'app.js?v=31',
+  'app.js?v=40',
   'cards.js?v=20',
   'vendor/lottie-web/lottie.min.js',
   'manifest.json',
@@ -28,6 +28,7 @@ const ASSETS = [
   'img/backs/zima_logo.png',
   'img/flowers/01_bouquet.json',
   'img/flowers/02_tulip.json',
+  'img/flowers/03_flowerfriend.json',
   'img/flowers/03_blooming.json',
   'img/flowers/04_roses.json',
   'img/flowers/05_sunflower.json',
