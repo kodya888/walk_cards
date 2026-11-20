@@ -106,8 +106,16 @@ def st_tr(p=(0, 0), a=(0, 0), r=0, o=100):
 
 def grp(*items):
     """Группа фигур. В Lottie последним элементом ОБЯЗАН идти transform (tr) —
-    если его забыли, добавляем нейтральный, иначе слой не рисуется вообще."""
-    items = list(items)
+    если его забыли, добавляем нейтральный, иначе слой не рисуется вообще.
+    Списки внутри аргументов разворачиваем (голый список внутри `it` Lottie
+    молча выбрасывает вместе со всем содержимым)."""
+    flat = []
+    for it in items:
+        if isinstance(it, list):
+            flat.extend(it)
+        else:
+            flat.append(it)
+    items = flat
     if not (items and items[-1].get("ty") == "tr"):
         items.append(st_tr())
     return {"ty": "gr", "nm": "g", "it": items}
@@ -150,16 +158,18 @@ LEAF_C = hx('57a83a')      # чуть светлее — листья
 def stem_group(top_y, stem_c, leaf_c=None, w=9, curl=12, leaves=2, head_leaves=False):
     """Стебель от (0,0) до (0, top_y): толстый, с изгибом, листьями на середине
     и — по желанию — парой больших листьев прямо под головкой (как в примере)."""
-    sh = [pth([(0, 0), (0, top_y)],
-              [[0, 0], [-curl, 0]], [[curl, 0], [0, 0]], nm="stem")]
+    sh = pth([(0, 0), (0, top_y)],
+             [[0, 0], [-curl, 0]], [[curl, 0], [0, 0]], nm="stem")
     shapes = [grp(sh, stroke(stem_c, w))]
     if leaf_c and leaves >= 1:
-        shapes.append(leaf(-16, top_y * 0.48, 13, 31, -36, leaf_c, (0, top_y * 0.54)))
+        # листья — у НИЗА стебля, у кромки коробки: выше стебли остаются
+        # открытыми, видны вертикальные «прутики» до головок
+        shapes.append(leaf(-14, top_y * 0.2, 10, 24, -36, leaf_c, (0, top_y * 0.26)))
     if leaf_c and leaves >= 2:
-        shapes.append(leaf(16, top_y * 0.66, 12, 28, 32, leaf_c, (0, top_y * 0.72)))
+        shapes.append(leaf(14, top_y * 0.38, 9, 22, 32, leaf_c, (0, top_y * 0.44)))
     if leaf_c and head_leaves:
-        shapes.append(leaf(-19, top_y + 18, 12, 31, -52, leaf_c, (0, top_y + 24)))
-        shapes.append(leaf(19, top_y + 28, 11, 28, 48, leaf_c, (0, top_y + 34)))
+        shapes.append(leaf(-17, top_y + 16, 10, 26, -52, leaf_c, (0, top_y + 22)))
+        shapes.append(leaf(17, top_y + 24, 9, 24, 48, leaf_c, (0, top_y + 30)))
     return shapes
 
 
@@ -346,7 +356,7 @@ def flower_layer(ind, f, nm):
     ])
     # ВАЖНО: у вращения значения ключей ОБЯЗАНЫ быть массивами [deg] —
     # lottie-web 5.13 на скалярах s:0 ломается и рисует слой под ~78°.
-    lean = f.get('lean', round((x - 250) / 18.0, 1))
+    lean = f.get('lean', round((x - 250) / 6.0, 1))     # левые — влево, правые — вправо
     tilt = f.get('tilt', 2.5)
     rt_keys = [kf(t0, [lean], LIN)]
     t, amp, sign = t0 + 30, tilt, 1
@@ -538,84 +548,84 @@ BOX_SHOTS = {
         'box': BOX_STYLES['orange'],
         'flowers': [
             # --- передний ряд: низкие цветы с короткими стеблями ---
-            {'kind': 'pop', 'x': 262, 'h': 105, 'r': 24, 't0': 64, 'tilt': -2.5,
+            {'kind': 'pop', 'x': 262, 'h': 122, 'r': 24, 't0': 64, 'tilt': -2.5,
              'colors': P_ORANGE},
-            {'kind': 'daisy', 'x': 216, 'h': 118, 'petals': 6, 'pr': 18, 'pw': 13,
+            {'kind': 'daisy', 'x': 216, 'h': 140, 'petals': 6, 'pr': 18, 'pw': 13,
              'rc': 12, 't0': 60, 'tilt': 3,
              'colors': {'petal': hx('fff3dd'), 'center': hx('e8873a')}},
-            {'kind': 'bud', 'x': 322, 'h': 128, 't0': 68, 'tilt': 2,
+            {'kind': 'bud', 'x': 322, 'h': 148, 't0': 68, 'tilt': 2,
              'colors': {'head': hx('ef6a9e')}},
-            {'kind': 'tulip', 'x': 172, 'h': 144, 't0': 56, 'tilt': -3,
+            {'kind': 'tulip', 'x': 172, 'h': 164, 't0': 56, 'tilt': -3,
              'colors': {'head': hx('b487e8')}},
             # --- средний ряд ---
-            {'kind': 'pop', 'x': 306, 'h': 155, 'r': 26, 't0': 50, 'tilt': 2.5,
+            {'kind': 'pop', 'x': 306, 'h': 198, 'r': 26, 't0': 50, 'tilt': 2.5,
              'colors': P_BLUE},
-            {'kind': 'daisy', 'x': 252, 'h': 172, 'petals': 7, 't0': 45, 'tilt': -2.5,
+            {'kind': 'daisy', 'x': 252, 'h': 214, 'petals': 7, 't0': 45, 'tilt': -2.5,
              'colors': P_PINK},
-            {'kind': 'tulip', 'x': 338, 'h': 192, 't0': 52, 'tilt': 3,
+            {'kind': 'tulip', 'x': 338, 'h': 232, 't0': 52, 'tilt': 3,
              'colors': {'head': hx('ffc233')}},
-            {'kind': 'tulip', 'x': 196, 'h': 222, 't0': 38, 'tilt': -2,
+            {'kind': 'tulip', 'x': 196, 'h': 252, 't0': 38, 'tilt': -2,
              'colors': P_RED},
             # --- задний ряд: первыми выскакивают бутоны на стеблях ---
-            {'kind': 'bud', 'x': 172, 'h': 185, 't0': 28, 'tilt': 2.5,
+            {'kind': 'bud', 'x': 172, 'h': 242, 't0': 28, 'tilt': 2.5,
              'colors': {'head': hx('ffc233'), 'leaf': hx('6db46a')}},
-            {'kind': 'bud', 'x': 255, 'h': 170, 't0': 31, 'tilt': -2,
+            {'kind': 'bud', 'x': 255, 'h': 226, 't0': 31, 'tilt': -2,
              'colors': {'head': hx('b487e8'), 'leaf': hx('8cc86f')}},
-            {'kind': 'bud', 'x': 332, 'h': 182, 't0': 34, 'tilt': 2,
+            {'kind': 'bud', 'x': 332, 'h': 236, 't0': 34, 'tilt': 2,
              'colors': {'head': hx('f9b7cd'), 'leaf': hx('57a05c')}},
         ],
     },
     'flowerboxb': {
         'box': BOX_STYLES['blue'],
         'flowers': [
-            {'kind': 'bud', 'x': 250, 'h': 112, 't0': 68, 'tilt': -2,
+            {'kind': 'bud', 'x': 250, 'h': 130, 't0': 68, 'tilt': -2,
              'colors': {'head': hx('ff8f5e')}},
-            {'kind': 'daisy', 'x': 296, 'h': 122, 'petals': 6, 'pr': 18, 'pw': 13,
+            {'kind': 'daisy', 'x': 296, 'h': 142, 'petals': 6, 'pr': 18, 'pw': 13,
              'rc': 12, 't0': 62, 'tilt': 3,
              'colors': {'petal': hx('fff3dd'), 'center': hx('e8873a')}},
-            {'kind': 'pop', 'x': 206, 'h': 136, 'r': 24, 't0': 57, 'tilt': 2.5,
+            {'kind': 'pop', 'x': 206, 'h': 160, 'r': 24, 't0': 57, 'tilt': 2.5,
              'colors': {'outer': hx('ffc233'), 'ring': hx('e8873a'),
                         'inner': hx('a04a20')}},
-            {'kind': 'tulip', 'x': 332, 'h': 150, 't0': 52, 'tilt': 3,
+            {'kind': 'tulip', 'x': 332, 'h': 172, 't0': 52, 'tilt': 3,
              'colors': {'head': hx('ff8f5e')}},
-            {'kind': 'daisy', 'x': 168, 'h': 168, 'petals': 8, 't0': 46, 'tilt': -3,
+            {'kind': 'daisy', 'x': 168, 'h': 212, 'petals': 8, 't0': 46, 'tilt': -3,
              'colors': P_PINK},
-            {'kind': 'pop', 'x': 254, 'h': 182, 'r': 26, 't0': 42, 'tilt': 2,
+            {'kind': 'pop', 'x': 254, 'h': 226, 'r': 26, 't0': 42, 'tilt': 2,
              'colors': {'outer': hx('e8434c'), 'ring': hx('ffd166'),
                         'inner': hx('8e2030')}},
-            {'kind': 'tulip', 'x': 330, 'h': 200, 't0': 36, 'tilt': -2.5,
+            {'kind': 'tulip', 'x': 330, 'h': 244, 't0': 36, 'tilt': -2.5,
              'colors': {'head': hx('ffc233')}},
-            {'kind': 'bud', 'x': 158, 'h': 192, 't0': 28, 'tilt': 2.5,
+            {'kind': 'bud', 'x': 158, 'h': 248, 't0': 28, 'tilt': 2.5,
              'colors': {'head': hx('ffc233'), 'leaf': hx('6db46a')}},
-            {'kind': 'bud', 'x': 292, 'h': 176, 't0': 31, 'tilt': -2,
+            {'kind': 'bud', 'x': 292, 'h': 228, 't0': 31, 'tilt': -2,
              'colors': {'head': hx('f9b7cd'), 'leaf': hx('8cc86f')}},
-            {'kind': 'bud', 'x': 218, 'h': 182, 't0': 34, 'tilt': 2,
+            {'kind': 'bud', 'x': 218, 'h': 236, 't0': 34, 'tilt': 2,
              'colors': {'head': hx('fff3dd'), 'leaf': hx('57a05c')}},
         ],
     },
     'flowerboxc': {
         'box': BOX_STYLES['pink'],
         'flowers': [
-            {'kind': 'pop', 'x': 260, 'h': 108, 'r': 24, 't0': 65, 'tilt': -2.5,
+            {'kind': 'pop', 'x': 260, 'h': 126, 'r': 24, 't0': 65, 'tilt': -2.5,
              'colors': P_BLUE},
-            {'kind': 'bud', 'x': 310, 'h': 120, 't0': 69, 'tilt': 2,
+            {'kind': 'bud', 'x': 310, 'h': 140, 't0': 69, 'tilt': 2,
              'colors': {'head': hx('ffc233')}},
-            {'kind': 'tulip', 'x': 210, 'h': 136, 't0': 58, 'tilt': 3,
+            {'kind': 'tulip', 'x': 210, 'h': 158, 't0': 58, 'tilt': 3,
              'colors': {'head': hx('fff3ea')}},
-            {'kind': 'tulip', 'x': 168, 'h': 165, 't0': 53, 'tilt': -3,
+            {'kind': 'tulip', 'x': 168, 'h': 184, 't0': 53, 'tilt': -3,
              'colors': {'head': hx('ffc233')}},
-            {'kind': 'pop', 'x': 345, 'h': 158, 'r': 25, 't0': 49, 'tilt': 2.5,
+            {'kind': 'pop', 'x': 345, 'h': 204, 'r': 25, 't0': 49, 'tilt': 2.5,
              'colors': {'outer': hx('ff8a3d'), 'ring': hx('ffd166'),
                         'inner': hx('d9542f')}},
-            {'kind': 'daisy', 'x': 262, 'h': 178, 'petals': 7, 't0': 44, 'tilt': 2.5,
+            {'kind': 'daisy', 'x': 262, 'h': 220, 'petals': 7, 't0': 44, 'tilt': 2.5,
              'colors': {'petal': hx('ef5a63'), 'center': hx('ffd166')}},
-            {'kind': 'tulip', 'x': 300, 'h': 205, 't0': 37, 'tilt': -2,
+            {'kind': 'tulip', 'x': 300, 'h': 248, 't0': 37, 'tilt': -2,
              'colors': {'head': hx('4d8fe8')}},
-            {'kind': 'bud', 'x': 172, 'h': 190, 't0': 28, 'tilt': 2,
+            {'kind': 'bud', 'x': 172, 'h': 244, 't0': 28, 'tilt': 2,
              'colors': {'head': hx('4d8fe8'), 'leaf': hx('7bb86b')}},
-            {'kind': 'bud', 'x': 232, 'h': 172, 't0': 31, 'tilt': -2.5,
+            {'kind': 'bud', 'x': 232, 'h': 226, 't0': 31, 'tilt': -2.5,
              'colors': {'head': hx('fff3ea'), 'leaf': hx('6db46a')}},
-            {'kind': 'bud', 'x': 330, 'h': 186, 't0': 34, 'tilt': 2.5,
+            {'kind': 'bud', 'x': 330, 'h': 236, 't0': 34, 'tilt': 2.5,
              'colors': {'head': hx('f9b7cd'), 'leaf': hx('57a05c')}},
         ],
     },
