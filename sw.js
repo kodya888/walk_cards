@@ -3,7 +3,7 @@
    поднимай номер версии (ниже и в ?v=... у тегов в index.html),
    иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v46';
+const VERSION = 'wc-v47';
 
 const ASSETS = [
   './',
