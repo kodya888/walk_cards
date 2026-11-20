@@ -573,6 +573,15 @@ const CARDS = [
     desc: 'Растёт на глазах.'
   },
   {
+    id: 'flower-smiley',
+    name: 'Цветок-весельчак',
+    img: 'img/flowers/05_colorflower.json',
+    thumb: 'img/flowers/05_colorflower_thumb.webp',
+    pack: 'flowers',
+    rarity: 'common',
+    desc: 'Выпрыгивает из земли и улыбается тебе.'
+  },
+  {
     id: 'flower-blooming',
     name: 'Расцветший сад',
     img: 'img/flowers/03_blooming.json',

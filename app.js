@@ -33,6 +33,7 @@ let state = {
   previewTulipGranted: false,     // одноразовый тестовый тюльпан в коллекции
   previewFriendGranted: false,    // одноразовый тестовый «Цветочный друг» в коллекции
   previewBloomGranted: false,     // одноразовый тестовый «Живой букет» в коллекции
+  previewSmileyGranted: false,    // одноразовый тестовый «Цветок-весельчак» в коллекции
   walks: 0,
   walksToday: 0,                  // карточек за сегодня
   day: '',                        // 'ГГГГ-ММ-ДД' — сброс дневного счётчика
@@ -87,6 +88,15 @@ function load() {
     if (!(state.collection['flower-bloom'] > 0)) {
       state.collection['flower-bloom'] = 1;
       if (!state.order.includes('flower-bloom')) state.order.push('flower-bloom');
+    }
+    save();
+  }
+  // Одноразово добавляем «Цветок-весельчак» для проверки на телефоне.
+  if (!state.previewSmileyGranted) {
+    state.previewSmileyGranted = true;
+    if (!(state.collection['flower-smiley'] > 0)) {
+      state.collection['flower-smiley'] = 1;
+      if (!state.order.includes('flower-smiley')) state.order.push('flower-smiley');
     }
     save();
   }
