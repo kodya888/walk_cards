@@ -549,6 +549,7 @@ const CARDS = [
     id: 'flower-tulip',
     name: 'Ранние тюльпаны',
     img: 'img/flowers/02_tulip.json',
+    thumb: 'img/flowers/02_tulip_thumb.webp',
     pack: 'flowers',
     rarity: 'common',
     desc: 'Весна пришла — не предупредив.'
@@ -557,6 +558,7 @@ const CARDS = [
     id: 'flower-friend',
     name: 'Цветочный друг',
     img: 'img/flowers/03_flowerfriend.json',
+    thumb: 'img/flowers/03_flowerfriend_thumb.webp',
     pack: 'flowers',
     rarity: 'rare',
     desc: 'Приносит по цветку за раз — и все они для тебя.'
@@ -565,6 +567,7 @@ const CARDS = [
     id: 'flower-bloom',
     name: 'Живой букет',
     img: 'img/flowers/04_flowerbloom.json',
+    thumb: 'img/flowers/04_flowerbloom_thumb.webp',
     pack: 'flowers',
     rarity: 'rare',
     desc: 'Растёт на глазах.'

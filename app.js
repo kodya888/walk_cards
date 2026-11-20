@@ -521,9 +521,13 @@ function showRewards(cards) {
             '<span class="card-rarity">' + (card.rarity === 'rare' ? '★ редкая' : 'обычная') + '</span>' +
           '</div>' +
         '</div>';
-      // у цветочных мини-карт вместо заглушки — статичный кадр из анимации
-      // (ставим сам Lottie-контейнер, paused, чтобы ряд не «прыгал»)
-      if (isLottieCard(card)) {
+      // у цветочных мини-карт вместо анимации — статичный кадр (thumb)
+      if (card.thumb) {
+        const img = document.createElement('img');
+        img.src = card.thumb; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+        shell.querySelector('.card-scene').appendChild(img);
+      } else if (isLottieCard(card)) {
+        // запасной вариант — застывший Lottie (превью не готово)
         const box = document.createElement('div');
         box.className = 'lottie-scene';
         shell.querySelector('.card-scene').appendChild(box);
@@ -583,9 +587,11 @@ function makeMiniCard(card) {
   el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
   el.innerHTML = `<div class="mini-scene"></div><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
   const scene = el.querySelector('.mini-scene');
-  if (isLottieCard(card)) {
-    // в сетке галереи анимация застывает на кадре: движение — по тапу,
-    // не гуляем батарейку на 10 одновременно играющих карточек
+  if (card.thumb) {
+    // в сетке галереи анимации не играют: статичный кадр (движение — в большой карточке)
+    scene.innerHTML = `<img src="${card.thumb}" alt="" loading="lazy" decoding="async">`;
+  } else if (isLottieCard(card)) {
+    // запасной вариант — застывший Lottie (превью не готово)
     const box = document.createElement('div');
     box.className = 'lottie-scene';
     scene.appendChild(box);
