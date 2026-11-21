@@ -100,6 +100,15 @@ function load() {
     }
     save();
   }
+  // Одноразово добавляем «Букет растёт» — подарок супруге, ходить не надо.
+  if (!state.previewGardenGranted) {
+    state.previewGardenGranted = true;
+    if (!(state.collection['flower-garden'] > 0)) {
+      state.collection['flower-garden'] = 1;
+      if (!state.order.includes('flower-garden')) state.order.push('flower-garden');
+    }
+    save();
+  }
 }
 
 /* ---------------- дневной лимит карточек ---------------- */
