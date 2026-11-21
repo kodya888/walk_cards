@@ -653,6 +653,15 @@ const CARDS = [
     pack: 'flowers',
     rarity: 'common',
     desc: 'Сначала пустая — а потом прыг! И уже букет.'
+  },
+  {
+    id: 'flower-garden',
+    name: 'Букет растёт',
+    img: 'img/flowers/13_bouquet_grow.json',
+    thumb: 'img/flowers/13_bouquet_grow_thumb.webp',
+    pack: 'flowers',
+    rarity: 'rare',
+    desc: 'Сначала зелёные стебельки — а потом цветок за цветком, целый букет.'
   }
 ];
 
