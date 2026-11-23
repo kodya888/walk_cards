@@ -3,7 +3,7 @@
    поднимай номер версии (ниже и в ?v=... у тегов в index.html),
    иначе телефон покажет старую копию. */
 
-const VERSION = 'wc-v52';
+const VERSION = 'wc-v53';
 
 const ASSETS = [
   './',
@@ -26,27 +26,6 @@ const ASSETS = [
   'img/backs/gorod_logo.svg',
   'img/backs/flowers_logo.svg',
   'img/backs/zima_logo.png',
-  'img/flowers/01_bouquet.json',
-  'img/flowers/02_tulip.json',
-  'img/flowers/02_tulip_thumb.webp',
-  'img/flowers/03_flowerfriend.json',
-  'img/flowers/03_flowerfriend_thumb.webp',
-  'img/flowers/04_flowerbloom.json',
-  'img/flowers/04_flowerbloom_thumb.webp',
-  'img/flowers/05_colorflower.json',
-  'img/flowers/05_colorflower_thumb.webp',
-  'img/flowers/03_blooming.json',
-  'img/flowers/04_roses.json',
-  'img/flowers/05_sunflower.json',
-  'img/flowers/06_daisy.json',
-  'img/flowers/07_peony.json',
-  'img/flowers/08_lilac.json',
-  'img/flowers/09_floralheart.json',
-  'img/flowers/10_giftpack.json',
-  'img/flowers/11_flowerbox.json',
-  'img/flowers/11_flowerbox_thumb.webp',
-  'img/flowers/13_bouquet_grow.json',
-  'img/flowers/13_bouquet_grow_thumb.webp',
   'img/lisa/01_borovik.webp',
   'img/lisa/02_shapka_lisichka.webp',
   'img/lisa/03_lisa_ryaninushka.webp',

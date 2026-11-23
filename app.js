@@ -63,52 +63,6 @@ function load() {
       state.order.push(id);
     }
   });
-  // Одноразово добавляем живой тюльпан для проверки на телефоне.
-  // Флаг не даёт получить его повторно после следующих запусков или подарка.
-  if (!state.previewTulipGranted) {
-    state.previewTulipGranted = true;
-    if (!(state.collection['flower-tulip'] > 0)) {
-      state.collection['flower-tulip'] = 1;
-      if (!state.order.includes('flower-tulip')) state.order.push('flower-tulip');
-    }
-    save();
-  }
-  // Одноразово добавляем «Цветочного друга» для проверки на телефоне.
-  if (!state.previewFriendGranted) {
-    state.previewFriendGranted = true;
-    if (!(state.collection['flower-friend'] > 0)) {
-      state.collection['flower-friend'] = 1;
-      if (!state.order.includes('flower-friend')) state.order.push('flower-friend');
-    }
-    save();
-  }
-  // Одноразово добавляем «Живой букет» для проверки на телефоне.
-  if (!state.previewBloomGranted) {
-    state.previewBloomGranted = true;
-    if (!(state.collection['flower-bloom'] > 0)) {
-      state.collection['flower-bloom'] = 1;
-      if (!state.order.includes('flower-bloom')) state.order.push('flower-bloom');
-    }
-    save();
-  }
-  // Одноразово добавляем «Цветок-весельчак» для проверки на телефоне.
-  if (!state.previewSmileyGranted) {
-    state.previewSmileyGranted = true;
-    if (!(state.collection['flower-smiley'] > 0)) {
-      state.collection['flower-smiley'] = 1;
-      if (!state.order.includes('flower-smiley')) state.order.push('flower-smiley');
-    }
-    save();
-  }
-  // Одноразово добавляем «Букет растёт» — подарок супруге, ходить не надо.
-  if (!state.previewGardenGranted) {
-    state.previewGardenGranted = true;
-    if (!(state.collection['flower-garden'] > 0)) {
-      state.collection['flower-garden'] = 1;
-      if (!state.order.includes('flower-garden')) state.order.push('flower-garden');
-    }
-    save();
-  }
 }
 
 /* ---------------- дневной лимит карточек ---------------- */
