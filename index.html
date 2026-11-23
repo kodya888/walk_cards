@@ -10,11 +10,12 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css?v=39">
+<link rel="stylesheet" href="style.css?v=44">
 </head>
 <body>
 
-<!-- заставка: следы «идут» по экрану, дошли — карточки появились -->
+<!-- заставка v1 (старая): следы «идут» по экрану, дошли — карточки появились.
+     Включается флагом ?splash=1 или localStorage wc_splash=1 -->
 <div id="splash">
   <div class="splash-title">
     <h2>Гуляю-собираю</h2>
@@ -44,6 +45,51 @@
     <span style="left:45.8%; bottom:36%;   --r:-6deg"></span>
     <span style="left:50.4%; bottom:39%;   --r:6deg"></span>
   </div>
+</div>
+
+<!-- заставка v2 (новая): нить-тропа прорисовывается, следы шагают по одному вдоль неё,
+     новый встал — предыдущий растворился; веер рубашек с наклоном боковых и бликом.
+     По умолчанию; откат к v1 — ?splash=1 -->
+<div id="splash2">
+  <svg class="spl-trail" viewBox="0 0 720 1280" preserveAspectRatio="none" aria-hidden="true">
+    <path id="spl-trail-path" pathLength="100"
+      d="M 360 1320 C 310 1170 430 1080 350 950 C 310 885 380 810 362 760"/>
+  </svg>
+
+  <div class="spl-head">
+    <h2><span style="--d:.1s">Г</span><span style="--d:.145s">у</span><span style="--d:.19s">л</span><span style="--d:.235s">я</span><span style="--d:.28s">ю</span><span style="--d:.325s">-</span><span style="--d:.37s">с</span><span style="--d:.415s">о</span><span style="--d:.46s">б</span><span style="--d:.505s">и</span><span style="--d:.55s">р</span><span style="--d:.595s">а</span><span style="--d:.64s">ю</span></h2>
+    <small>Карточки за прогулки</small>
+  </div>
+
+  <!-- шаги: по одному, левый/правый по сторонам тропы; позиции равномерны по длине кривой -->
+  <div class="spl-steps" aria-hidden="true">
+    <span class="mir" style="left:45.56%; top:100.94%; --d:.5s;  --o:.68s;  --r:-18deg"></span>
+    <span style="left:48.89%; top:95.86%; --d:.63s; --o:.81s;  --r:7deg"></span>
+    <span class="mir" style="left:45%;    top:90.78%; --d:.76s; --o:.94s;  --r:2deg"></span>
+    <span style="left:51.53%; top:86.72%; --d:.89s; --o:1.07s; --r:18deg"></span>
+    <span class="mir" style="left:48.33%; top:81.56%; --d:1.02s; --o:1.2s;  --r:-3deg"></span>
+    <span style="left:52.5%;  top:76.64%; --d:1.15s; --o:1.33s; --r:-5deg"></span>
+    <span class="mir" style="left:44.86%; top:73.2%;  --d:1.28s; --o:1.46s; --r:-18deg"></span>
+    <span style="left:47.64%; top:68.05%; --d:1.41s; --o:1.59s; --r:15deg"></span>
+    <span class="mir" style="left:45.14%; top:62.89%; --d:1.54s; --o:1.72s; --r:10deg"></span>
+    <span style="left:51.39%; top:58.44%; --d:1.67s; --o:2.1s;  --r:1deg"></span>
+  </div>
+
+  <div class="spl-glow"></div>
+
+  <div class="spl-fan">
+    <div class="spl-card card-back" data-pack="gorod">
+      <div class="card-back-inner"><div class="card-back-mark"></div></div>
+    </div>
+    <div class="spl-card card-back" data-pack="lisa">
+      <div class="card-back-inner"><div class="card-back-mark"></div><span class="spl-shine"></span></div>
+    </div>
+    <div class="spl-card card-back" data-pack="kot">
+      <div class="card-back-inner"><div class="card-back-mark"></div></div>
+    </div>
+  </div>
+
+  <div class="spl-veil"></div>
 </div>
 
 <div id="map"></div>
@@ -199,6 +245,6 @@
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="vendor/lottie-web/lottie.min.js"></script>
 <script src="cards.js?v=24"></script>
-<script src="app.js?v=48"></script>
+<script src="app.js?v=50"></script>
 </body>
 </html>
