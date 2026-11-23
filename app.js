@@ -1118,11 +1118,23 @@ function fgAccept() {
   if (!geoStarted) startGeo();    // если останется гулять — спросят гео тут, а не при входе
 }
 
-/* ---------------- заставка ---------------- */
+/* ---------------- заставка ----------------
+
+   Две заставки:
+   v2 (#splash2) — новая «тропа рисуется» (по умолчанию);
+   v1 (#splash) — прежняя, включается ?splash=1 или localStorage wc_splash=1
+   (откат без потери кода). После испытаний удаляем ненужную. */
 
 function initSplash() {
-  const s = $('splash');
+  const flag = new URLSearchParams(location.search).get('splash')
+    || localStorage.getItem('wc_splash') || '2';
+  const old = $('splash'), neo = $('splash2');
+  const s = (flag === '1') ? old : neo;
+  // неиспользуемый вариант убираем из DOM сразу
+  if (old && old !== s) old.remove();
+  if (neo && neo !== s) neo.remove();
   if (!s) return;
+  const dur = (s === neo) ? 2500 : 2450;
   const debug = location.search.includes('debug') || localStorage.getItem('wc_debug') === '1';
   if (debug) { s.remove(); return; }
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1134,9 +1146,9 @@ function initSplash() {
     setTimeout(() => { if (s.parentNode) s.remove(); }, 520);
   };
   s.addEventListener('click', skip);
-  setTimeout(skip, reduce ? 400 : 2450);
+  setTimeout(skip, reduce ? 400 : dur);
   // страховка: даже если что-то пошло не так, заставка исчезнет
-  setTimeout(() => { if (s.parentNode) s.remove(); }, 3400);
+  setTimeout(() => { if (s.parentNode) s.remove(); }, dur + 950);
 }
 
 /* ---------------- запуск ---------------- */

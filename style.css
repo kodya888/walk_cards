@@ -210,7 +210,129 @@ html, body {
 
 @media (prefers-reduced-motion: reduce) {
   .splash-title, .splash-steps span, .splash-fan { animation-duration: .01s; animation-delay: 0s; }
+  .spl-head h2 span, .spl-head small, .spl-steps span, .spl-trail path,
+  .spl-glow, .spl-card, .spl-card .card-back-inner, .spl-shine, .spl-veil {
+    animation-duration: .01s; animation-delay: 0s;
+  }
 }
+
+/* ===== заставка v2: тропа рисуется ===== */
+#splash2 {
+  position: fixed; inset: 0; z-index: 2000;
+  background: var(--bg);
+  overflow: hidden;
+}
+#splash2.splash-done { animation: splash-fade .5s ease forwards; }
+
+/* нить-тропа: прорисовывается снизу вверх и тает за веером */
+.spl-trail {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1;
+}
+#spl-trail-path {
+  fill: none; stroke: #e8b968; stroke-width: 2.5; stroke-linecap: round;
+  opacity: .55;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: spl-trail-draw 1.3s linear .4s forwards,
+             spl-fade-out .4s ease 2.05s forwards;
+}
+@keyframes spl-trail-draw { to { stroke-dashoffset: 0; } }
+@keyframes spl-fade-out { to { opacity: 0; } }
+
+/* надпись: буквы по одной из лёгкого размытия */
+.spl-head { position: absolute; top: 19.5%; left: 0; right: 0; text-align: center; z-index: 3; }
+.spl-head h2 {
+  margin: 0 0 6px; font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(26px, 7.5vw, 40px); font-weight: 700; letter-spacing: .01em;
+  white-space: nowrap; /* буквы - отдельные span, без nowrap браузер рвёт строку между ними */
+}
+.spl-head h2 span { display: inline-block; opacity: 0; animation: spl-letter .12s ease-out forwards; animation-delay: var(--d, .1s); }
+.spl-head small {
+  color: var(--muted); font-size: clamp(12px, 3.1vw, 16px); letter-spacing: .08em;
+  opacity: 0; animation: spl-fade-in .25s ease .75s forwards;
+}
+@keyframes spl-letter {
+  from { opacity: .25; filter: blur(4px); transform: translateY(4px); }
+  to   { opacity: 1;  filter: blur(0);   transform: translateY(0); }
+}
+@keyframes spl-fade-in { to { opacity: 1; } }
+
+/* шаги: по одному следу вдоль тропы, левый/правый (зеркальный) по сторонам нити;
+   новый встал — предыдущий растворяется (--d — появление, --o — растворение) */
+.spl-steps { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.spl-steps span {
+  position: absolute; width: clamp(9px, 3.33vw, 17px); aspect-ratio: 20 / 35; opacity: 0;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 35'><rect x='1.5' y='0.5' width='17' height='22.5' rx='8' fill='%23e8b968'/><rect x='7.8' y='25' width='11' height='9.5' rx='4.6' fill='%23e8b968'/></svg>") center/contain no-repeat;
+  animation: spl-step .3s cubic-bezier(.2,.9,.3,1.2) var(--d, 0s) forwards,
+             spl-step-out .3s ease var(--o, 2.1s) forwards;
+}
+.spl-steps span.mir {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 35'><g transform='translate(20,0) scale(-1,1)'><rect x='1.5' y='0.5' width='17' height='22.5' rx='8' fill='%23e8b968'/><rect x='7.8' y='25' width='11' height='9.5' rx='4.6' fill='%23e8b968'/></g></svg>") center/contain no-repeat;
+}
+@keyframes spl-step {
+  from { opacity: 0; transform: scale(.3) rotate(calc(var(--r, 0deg) + 14deg)) translateY(-6px); }
+  to   { opacity: .85; transform: scale(1) rotate(var(--r, 0deg)) translateY(0); }
+}
+@keyframes spl-step-out {
+  to { opacity: 0; transform: scale(.7) rotate(var(--r, 0deg)); }
+}
+
+/* тёплое свечение за веером */
+.spl-glow {
+  position: absolute; left: 50%; top: 46.9%; width: clamp(200px, 69vw, 340px);
+  aspect-ratio: 1; transform: translate(-50%,-50%) scale(.75);
+  background: radial-gradient(circle, rgba(232,185,104,.5) 0%, rgba(232,185,104,0) 65%);
+  opacity: 0; z-index: 3;
+  animation: spl-glow .6s ease-out 1.95s forwards;
+}
+@keyframes spl-glow { to { opacity: .4; transform: translate(-50%,-50%) scale(1); } }
+
+/* веер рубашек: выскакивают по одному, боковые дотягиваются до наклона */
+.spl-fan {
+  position: absolute; left: 50%; bottom: 44.9%;
+  width: clamp(170px, 50vw, 260px); height: clamp(100px, 31vw, 162px);
+  margin-left: calc(clamp(170px, 50vw, 260px) / -2);
+  z-index: 4;
+}
+.spl-card {
+  position: absolute; bottom: 0; width: clamp(75px, 20.56vw, 107px); aspect-ratio: 2 / 3;
+  box-shadow: 0 14px 36px rgba(0,0,0,.55);
+  opacity: 0;
+}
+.spl-card:nth-child(1) { left: 0;    animation: spl-card-pop .5s cubic-bezier(.3,1.35,.5,1) 1.78s forwards; }
+.spl-card:nth-child(2) { left: 50%; bottom: clamp(4px, 1.9vw, 10px); z-index: 2;
+                         animation: spl-card-pop-center .5s cubic-bezier(.3,1.35,.5,1) 1.87s forwards; }
+.spl-card:nth-child(3) { right: 0;  animation: spl-card-pop .5s cubic-bezier(.3,1.35,.5,1) 1.96s forwards; }
+@keyframes spl-card-pop {
+  from { opacity: 0; transform: translateY(5vw) scale(.85); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes spl-card-pop-center {
+  from { opacity: 0; transform: translateX(-50%) translateY(5vw) scale(.85); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+/* наклон боковых рубашек после посадки: на внутреннем поле, чтобы не ломать трансформы внешнего */
+.spl-card:nth-child(1) .card-back-inner { transform: rotate(0deg); animation: spl-tilt-l .35s cubic-bezier(.2,.9,.3,1.25) 2.0s forwards; }
+.spl-card:nth-child(3) .card-back-inner { transform: rotate(0deg); animation: spl-tilt-r .35s cubic-bezier(.2,.9,.3,1.25) 2.12s forwards; }
+@keyframes spl-tilt-l { to { transform: rotate(-8deg); } }
+@keyframes spl-tilt-r { to { transform: rotate(8deg); } }
+.spl-card .card-back-mark { width: 55%; }
+
+/* блик по центральной рубашке */
+.spl-shine {
+  position: absolute; top: -10%; bottom: -10%; left: -45%; width: 45%;
+  background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.35) 50%, rgba(255,255,255,0) 100%);
+  animation: spl-shine .45s ease-in-out 2.28s forwards;
+}
+@keyframes spl-shine { to { transform: translateX(460%); } }
+
+/* плавный уход в конце */
+.spl-veil {
+  position: absolute; inset: 0; background: var(--bg); z-index: 5;
+  opacity: 0; animation: spl-veil .28s ease-in 2.72s forwards;
+}
+@keyframes spl-veil { to { opacity: 1; } }
 
 /* ===== карточка ===== */
 .overlay {
