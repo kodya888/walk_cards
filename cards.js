@@ -531,12 +531,39 @@ const CARDS = [
     img: 'img/kot/17_banochnyy_perepoloh.webp',
     pack: 'kot',
     rarity: 'common'
-  }
+  },
 
-  /* ПАК 5 «Цветы» снят с публикации 2026-11-23: анимационные карточки
-     и их JSON-файлы переехали в C:\Users\ADMIN\Documents\ai_moi\
-     walk_cards_flowers_anim\ (блок для возврата — cards_flowers_anim.js).
-     Сам пак 'flowers' в PACKS остался — коллекция пустая. */
+  /* ПАК 5 «Цветы» — возвращён 2026-11-23 на новых фото-карточках (букеты).
+     Старые анимационные (01–13) по-прежнему в C:\Users\ADMIN\Documents\ai_moi\
+     walk_cards_flowers_anim\ (блок для возврата — cards_flowers_anim.js). */
+  {
+    id: 'pastelnyi-buket',
+    name: 'Пастельный букет',
+    img: 'img/flowers/14_pastel_buket.webp',
+    pack: 'flowers',
+    rarity: 'common'
+  },
+  {
+    id: 'tyulpany-i-rozy',
+    name: 'Тюльпаны и розы',
+    img: 'img/flowers/15_tulips_roses.webp',
+    pack: 'flowers',
+    rarity: 'common'
+  },
+  {
+    id: 'persikovyi-buket',
+    name: 'Персиковый букет',
+    img: 'img/flowers/16_peach_roses.webp',
+    pack: 'flowers',
+    rarity: 'rare'
+  },
+  {
+    id: 'rozy-i-lilii',
+    name: 'Розы и лилии',
+    img: 'img/flowers/17_lilies_roses.webp',
+    pack: 'flowers',
+    rarity: 'rare'
+  }
 ];
 
 /* Коллекции (паки) в порядке показа в галерее. */

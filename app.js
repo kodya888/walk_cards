@@ -63,6 +63,21 @@ function load() {
       state.order.push(id);
     }
   });
+  // Одноразово даём 4 цветочных карточки (пак «Цветы») — партнёр смотрит
+  // пак собранным. Флаг не даёт выдать повторно при следующих запусках.
+  if (!state.flowersPreviewGranted) {
+    state.flowersPreviewGranted = true;
+    const ids = ['pastelnyi-buket', 'tyulpany-i-rozy', 'persikovyi-buket', 'rozy-i-lilii'];
+    let given = false;
+    ids.forEach(id => {
+      if (CARD_BY_ID[id] && !(state.collection[id] > 0)) {
+        state.collection[id] = 1;
+        if (!state.order.includes(id)) state.order.push(id);
+        given = true;
+      }
+    });
+    if (given) save();
+  }
 }
 
 /* ---------------- дневной лимит карточек ---------------- */
