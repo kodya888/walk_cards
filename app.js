@@ -78,6 +78,16 @@ function load() {
     });
     if (given) save();
   }
+  // Одноразово даём карточку «Букет с каллами» (свой флаг — выдаётся и тем,
+  // кто уже получал первый цветочный грант).
+  if (!state.flowersKallaGranted) {
+    state.flowersKallaGranted = true;
+    if (CARD_BY_ID['buket-s-kallami'] && !(state.collection['buket-s-kallami'] > 0)) {
+      state.collection['buket-s-kallami'] = 1;
+      if (!state.order.includes('buket-s-kallami')) state.order.push('buket-s-kallami');
+      save();
+    }
+  }
 }
 
 /* ---------------- дневной лимит карточек ---------------- */
