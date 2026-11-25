@@ -570,6 +570,14 @@ const CARDS = [
     img: 'img/flowers/18_buket_s_kallami.webp',
     pack: 'flowers',
     rarity: 'rare'
+  },
+  {
+    id: 'buket-v-upakovke',
+    name: 'Букет в упаковке',
+    img: 'img/flowers/19_buket_v_upakovke.webp',
+    pack: 'flowers',
+    rarity: 'rare',
+    scene: 'pink'
   }
 ];
 

@@ -384,6 +384,20 @@ html, body {
   box-shadow: 0 0 0 2px rgba(255,224,138,.5), 0 0 34px rgba(255,192,64,.55), 0 18px 50px rgba(0,0,0,.55);
   background: linear-gradient(165deg, #fffaf0, #f0e2c0);
 }
+/* розовая подложка для отдельных карточек (card.scene = 'pink'):
+   та же схема, что у крема, но в розовом тонале; рамка и акценты
+   остаются золотыми */
+.card-front.pink-scene {
+  background: linear-gradient(165deg, #fdeef2, #f6d7e0);
+}
+.card-front.rare.pink-scene {
+  background: linear-gradient(165deg, #fef3f6, #f6d7e0);
+}
+.card-front.pink-scene .card-text,
+.card-front.pink-scene .card-front-desc,
+.card-front.pink-scene .card-rarity {
+  color: #5a3140;
+}
 
 /* ===== рубашка карточки =====
    Белый кант, ровное поле цвета коллекции, двойная белая рамка

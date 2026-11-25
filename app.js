@@ -88,6 +88,15 @@ function load() {
       save();
     }
   }
+  // Одноразово даём карточку «Букет в упаковке» (первую на розовой подложке).
+  if (!state.flowersWrapGranted) {
+    state.flowersWrapGranted = true;
+    if (CARD_BY_ID['buket-v-upakovke'] && !(state.collection['buket-v-upakovke'] > 0)) {
+      state.collection['buket-v-upakovke'] = 1;
+      if (!state.order.includes('buket-v-upakovke')) state.order.push('buket-v-upakovke');
+      save();
+    }
+  }
 }
 
 /* ---------------- дневной лимит карточек ---------------- */
@@ -349,6 +358,10 @@ function destroyLottieIn(container) {
   container._lottieInst = null;
 }
 
+/* Подложка лицевой стороны: у некоторых карточек свой цветовой тон
+   (card.scene = 'pink') — CSS-модификатор .pink-scene в style.css */
+const sceneClass = card => (card.scene === 'pink' ? ' pink-scene' : '');
+
 /** Наполнить «сцену» карточки: картинка-файл или Lottie-анимация. */
 function fillScene(container, card) {
   container.innerHTML = '';
@@ -399,6 +412,7 @@ function showCard(card, fromGallery = false) {
   els.cardFront.classList.toggle('no-desc', !desc);
 
   els.cardFront.classList.toggle('rare', card.rarity === 'rare');
+  els.cardFront.classList.toggle('pink-scene', card.scene === 'pink');
   els.cardImg.src = card.img;
   els.cardImg.alt = card.name;
   // у Lottie-карточек вместо <img> играет анимация в своём контейнере
@@ -463,7 +477,7 @@ function showRewards(cards) {
     shell.className = 'reward-shell';
     shell.innerHTML =
       '<div class="card-inner flipped">' +
-        '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + '" data-pack="' + pack + '">' +
+        '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + sceneClass(card) + '" data-pack="' + pack + '">' +
           '<span class="card-no">№ ' + no + '</span>' +
           '<div class="card-scene"></div>' +
           '<div class="card-text">' + card.name + '</div>' +
@@ -508,7 +522,7 @@ function showRewards(cards) {
       shell.style.animationDelay = (i * 0.12).toFixed(2) + 's';
       shell.innerHTML =
         '<div class="card-inner">' +
-          '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + '" data-pack="' + pack + '">' +
+          '<div class="face card-front' + (card.rarity === 'rare' ? ' rare' : '') + sceneClass(card) + '" data-pack="' + pack + '">' +
             '<span class="card-no">№ ' + no + '</span>' +
             '<div class="card-scene">' +
               (isLottieCard(card)
@@ -582,7 +596,7 @@ function packStats(key) {
 function makeMiniCard(card) {
   const ownedCount = state.collection[card.id] || 0;
   const el = document.createElement('div');
-  el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '');
+  el.className = 'mini-card' + (card.rarity === 'rare' ? ' rare' : '') + sceneClass(card);
   el.innerHTML = `<div class="mini-scene"></div><div>${card.name}</div><small class="mini-no">№ ${String(CARDS.indexOf(card) + 1).padStart(2, '0')}</small>`;
   const scene = el.querySelector('.mini-scene');
   if (card.thumb) {
@@ -1063,6 +1077,7 @@ function openGiftScreen(code) {
   const from = new URLSearchParams(location.search).get('from');
   els.fgSub.textContent = from ? 'Подарок от: ' + from : 'Живой цветок — только для тебя';
   els.fgFront.dataset.pack = fgCard.pack || 'flowers';
+  els.fgFront.classList.toggle('pink-scene', fgCard.scene === 'pink');
   els.fgBack.dataset.pack = fgCard.pack || 'flowers';
   els.fgNo.textContent = '№ ' + String(CARDS.indexOf(fgCard) + 1).padStart(2, '0');
   els.fgName.textContent = fgCard.name;
