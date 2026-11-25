@@ -97,6 +97,14 @@ function load() {
       save();
     }
   }
+  // Чит: ?grant=<id> в адресе — добавляет одну карточку в коллекцию только
+  // ЭТОГО устройства (для личной проверки новинок; другим не раздаётся).
+  const grantId = new URLSearchParams(location.search).get('grant');
+  if (grantId && CARD_BY_ID[grantId] && !(state.collection[grantId] > 0)) {
+    state.collection[grantId] = 1;
+    if (!state.order.includes(grantId)) state.order.push(grantId);
+    save();
+  }
 }
 
 /* ---------------- дневной лимит карточек ---------------- */
@@ -359,8 +367,10 @@ function destroyLottieIn(container) {
 }
 
 /* Подложка лицевой стороны: у некоторых карточек свой цветовой тон
-   (card.scene = 'pink') — CSS-модификатор .pink-scene в style.css */
-const sceneClass = card => (card.scene === 'pink' ? ' pink-scene' : '');
+   (card.scene = 'pink' | 'pink2') — CSS-модификаторы .pink-scene/.pink2-scene */
+const sceneClass = card =>
+  card.scene === 'pink' ? ' pink-scene' :
+  card.scene === 'pink2' ? ' pink2-scene' : '';
 
 /** Наполнить «сцену» карточки: картинка-файл или Lottie-анимация. */
 function fillScene(container, card) {
@@ -413,6 +423,7 @@ function showCard(card, fromGallery = false) {
 
   els.cardFront.classList.toggle('rare', card.rarity === 'rare');
   els.cardFront.classList.toggle('pink-scene', card.scene === 'pink');
+  els.cardFront.classList.toggle('pink2-scene', card.scene === 'pink2');
   els.cardImg.src = card.img;
   els.cardImg.alt = card.name;
   // у Lottie-карточек вместо <img> играет анимация в своём контейнере
@@ -1078,6 +1089,7 @@ function openGiftScreen(code) {
   els.fgSub.textContent = from ? 'Подарок от: ' + from : 'Живой цветок — только для тебя';
   els.fgFront.dataset.pack = fgCard.pack || 'flowers';
   els.fgFront.classList.toggle('pink-scene', fgCard.scene === 'pink');
+  els.fgFront.classList.toggle('pink2-scene', fgCard.scene === 'pink2');
   els.fgBack.dataset.pack = fgCard.pack || 'flowers';
   els.fgNo.textContent = '№ ' + String(CARDS.indexOf(fgCard) + 1).padStart(2, '0');
   els.fgName.textContent = fgCard.name;

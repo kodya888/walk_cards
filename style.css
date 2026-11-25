@@ -398,6 +398,18 @@ html, body {
 .card-front.pink-scene .card-rarity {
   color: #5a3140;
 }
+/* розовый насыщенный (карточка №79): ROZOV2 f9d8e4 -> f0b9cd */
+.card-front.pink2-scene {
+  background: linear-gradient(165deg, #f9d8e4, #f0b9cd);
+}
+.card-front.rare.pink2-scene {
+  background: linear-gradient(165deg, #fadfe8, #f0b9cd);
+}
+.card-front.pink2-scene .card-text,
+.card-front.pink2-scene .card-front-desc,
+.card-front.pink2-scene .card-rarity {
+  color: #5a3140;
+}
 
 /* ===== рубашка карточки =====
    Белый кант, ровное поле цвета коллекции, двойная белая рамка

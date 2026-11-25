@@ -578,6 +578,14 @@ const CARDS = [
     pack: 'flowers',
     rarity: 'rare',
     scene: 'pink'
+  },
+  {
+    id: 'buket-prazdnichny',
+    name: 'Праздничный букет',
+    img: 'img/flowers/20_buket_prazdnichny.webp',
+    pack: 'flowers',
+    rarity: 'rare',
+    scene: 'pink2'
   }
 ];
 
