@@ -30,6 +30,7 @@ let state = {
   collection: {},                 // id карточки -> сколько раз попадалась
   order: [],                      // id карточек в порядке получения (для галереи)
   giftsAccepted: [],              // канонические подарочные коды, принятые на этом телефоне
+  giftNotes: {},                  // код подарка -> надпись на рубашке (памятка получателя)
   previewTulipGranted: false,     // одноразовый тестовый тюльпан в коллекции
   previewFriendGranted: false,    // одноразовый тестовый «Цветочный друг» в коллекции
   previewBloomGranted: false,     // одноразовый тестовый «Живой букет» в коллекции
@@ -53,6 +54,7 @@ function load() {
     }
   } catch (e) {}
   if (!Array.isArray(state.giftsAccepted)) state.giftsAccepted = [];
+  if (!state.giftNotes || typeof state.giftNotes !== 'object') state.giftNotes = {};
   if (!Array.isArray(state.order)) {          // переход со старой версии
     state.order = CARDS.filter(c => state.collection[c.id] > 0).map(c => c.id);
   }
@@ -227,6 +229,11 @@ const els = {
   giftInput: $('gift-input'),
   giftMsg: $('gift-msg'),
   btnGiftYes: $('btn-gift-yes'),
+  giftNote: $('gift-note'),
+  cardBackInner: $('card-back-inner'),
+  cardNote: $('card-note'),
+  fgBackInner: $('fg-back-inner'),
+  fgNote: $('fg-note'),
   btnGiftNo: $('btn-gift-no'),
   btnGiftCopy: $('btn-gift-copy'),
   btnGiftShare: $('btn-gift-share'),
@@ -423,6 +430,8 @@ function showCard(card, fromGallery = false) {
 
   els.cardBack.dataset.pack = pack;
   els.cardFront.dataset.pack = pack;
+  // надпись-памятка на рубашке: только у карточек, принятых подарком с надписью
+  setCardBackNote(els.cardBackInner, els.cardNote, state.giftNotes[encodeGiftCode(card)] || '');
 
   // подпись карточки всегда на лицевой стороне: на обороте только знак
   const desc = card.desc || '';
@@ -935,6 +944,16 @@ function decodeGiftCode(raw) {
 
 let giftCard = null;   // карточка, чей код уже показан (она уже ушла)
 
+/** Надпись на рубашке: пробелы схлопнуть, не длиннее 60 знаков. */
+const normalizeNote = raw => String(raw || '').trim().replace(/\s+/g, ' ').slice(0, 60);
+
+/** Показать/убрать надпись на рубашке одного из больших оверлеев. */
+function setCardBackNote(innerEl, noteEl, text) {
+  noteEl.textContent = text || '';
+  noteEl.classList.toggle('hidden', !text);
+  innerEl.classList.toggle('has-note', !!text);
+}
+
 function showGiftView(v) {
   els.giftConfirmView.classList.toggle('hidden', v !== 'confirm');
   els.giftCodeView.classList.toggle('hidden', v !== 'code');
@@ -963,6 +982,7 @@ function doGift(card) {
   giftCard = card;
   els.giftCodeName.textContent = '«' + card.name + '»';
   els.giftCode.textContent = encodeGiftCode(card);
+  els.giftNote.value = '';          // чистое поле под новый подарок
   showGiftView('code');
   try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
 }
@@ -980,9 +1000,12 @@ function closeGift() {
   renderStats();
 }
 
-/** Ссылка-подарок: она сама несёт код, получателю вводить ничего не нужно. */
+/** Ссылка-подарок: код + (если написана) надпись для рубашки получателя. */
 function giftCardLink(code) {
-  return location.origin + location.pathname + '?gift=' + encodeURIComponent(code);
+  let link = location.origin + location.pathname + '?gift=' + encodeURIComponent(code);
+  const note = normalizeNote(els.giftNote.value);
+  if (note) link += '&msg=' + encodeURIComponent(note);
+  return link;
 }
 
 function copyGiftLink() {
@@ -1025,10 +1048,12 @@ function copyGiftCode() {
 
 function giftShare() {
   const code = els.giftCode.textContent;
+  const note = normalizeNote(els.giftNote.value);
   if (navigator.share) {
     navigator.share({
       title: 'Гуляю-собираю — подарок!',
-      text: 'Дарю тебе «' + (giftCard ? giftCard.name : 'подарок') + '»!',
+      text: 'Дарю тебе «' + (giftCard ? giftCard.name : 'подарок') + '»!' +
+            (note ? ' ' + note : ''),
       url: giftCardLink(code)
     }).catch(() => {});
   } else {
@@ -1080,6 +1105,7 @@ function acceptGiftDraft() {
 let giftMode = false;     // открыты по подарочной ссылке — гостю GPS не нужен
 let geoStarted = false;
 let fgCard = null;        // карточка в подарке получателя
+let fgMsg = '';           // надпись на рубашке из ссылки (&msg=...)
 let gsLottie = null;      // анимация на полноэкранном «раскрытии»
 
 function openGiftScreen(code) {
@@ -1100,6 +1126,8 @@ function openGiftScreen(code) {
   els.fgFront.classList.toggle('pink-scene', fgCard.scene === 'pink');
   els.fgFront.classList.toggle('pink2-scene', fgCard.scene === 'pink2');
   els.fgBack.dataset.pack = fgCard.pack || 'flowers';
+  fgMsg = normalizeNote(new URLSearchParams(location.search).get('msg'));
+  setCardBackNote(els.fgBackInner, els.fgNote, fgMsg);
   els.fgNo.textContent = '№ ' + String(CARDS.indexOf(fgCard) + 1).padStart(2, '0');
   els.fgName.textContent = fgCard.name;
   els.fgDesc.textContent = fgCard.desc || '';
@@ -1149,6 +1177,10 @@ function fgAccept() {
     state.order = (state.order || []).filter(id => id !== fgCard.id);
     state.order.push(fgCard.id);
     state.giftsAccepted.push(canonical);
+  }
+  // надпись сохраняем даже для «Уже в твоей коллекции» — она могла приехать в ссылке
+  if (fgMsg) {
+    state.giftNotes[canonical] = fgMsg;
     save();
   }
   renderStats();

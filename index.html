@@ -10,7 +10,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-<link rel="stylesheet" href="style.css?v=47">
+<link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
 
@@ -129,8 +129,9 @@
         <span class="card-rarity" id="card-rarity"></span>
       </div>
       <div class="face card-back" id="card-back" data-pack="gorod">
-        <div class="card-back-inner">
+        <div class="card-back-inner" id="card-back-inner">
           <div class="card-back-mark" id="card-back-mark"></div>
+          <div class="card-back-note hidden" id="card-note"></div>
         </div>
       </div>
     </div>
@@ -187,6 +188,10 @@
     <h2>Подарок готов</h2>
     <p class="gift-cardname" id="gift-code-name"></p>
     <div class="gift-code" id="gift-code"></div>
+    <input id="gift-note" class="gift-note-input" type="text" maxlength="60" autocomplete="off"
+           placeholder="Надпись на рубашке — напр.: С юбилеем!">
+    <p class="muted">Надпись увидит получатель на рубашке подарка — рукописным шрифтом.
+      Она едет только по ссылке, при передаче кодом не сохраняется.</p>
     <p class="muted">Ссылка ведёт прямо на этот подарок: откроется красивый экран.
       Для тех, у кого нет приложения, есть и код — через 🎁 наверху экрана.</p>
     <button id="btn-gift-link" class="primary-btn">Ссылка-подарок 🎁</button>
@@ -220,8 +225,9 @@
         <span class="card-rarity" id="fg-rarity"></span>
       </div>
       <div class="face card-back" id="fg-back" data-pack="flowers">
-        <div class="card-back-inner">
+        <div class="card-back-inner" id="fg-back-inner">
           <div class="card-back-mark"></div>
+          <div class="card-back-note hidden" id="fg-note"></div>
         </div>
       </div>
     </div>
@@ -245,6 +251,6 @@
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="vendor/lottie-web/lottie.min.js"></script>
 <script src="cards.js?v=28"></script>
-<script src="app.js?v=55"></script>
+<script src="app.js?v=56"></script>
 </body>
 </html>
