@@ -97,6 +97,15 @@ function load() {
       save();
     }
   }
+  // Одноразово даём карточку «Белые лилии» (широкий букет по диагонали).
+  if (!state.flowersLiliyGranted) {
+    state.flowersLiliyGranted = true;
+    if (CARD_BY_ID['liliy-belye'] && !(state.collection['liliy-belye'] > 0)) {
+      state.collection['liliy-belye'] = 1;
+      if (!state.order.includes('liliy-belye')) state.order.push('liliy-belye');
+      save();
+    }
+  }
   // Чит: ?grant=<id> в адресе — добавляет одну карточку в коллекцию только
   // ЭТОГО устройства (для личной проверки новинок; другим не раздаётся).
   const grantId = new URLSearchParams(location.search).get('grant');

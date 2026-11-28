@@ -586,6 +586,13 @@ const CARDS = [
     pack: 'flowers',
     rarity: 'rare',
     scene: 'pink2'
+  },
+  {
+    id: 'liliy-belye',
+    name: 'Белые лилии',
+    img: 'img/flowers/21_liliy_belye.webp',
+    pack: 'flowers',
+    rarity: 'common'
   }
 ];
 
